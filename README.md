@@ -1,60 +1,42 @@
 # ⚔ PowerEDH — Commander Deck Evaluator
 
-A browser-based tool for evaluating your Commander deck's true power level — beyond just brackets.
+Paste an Archidekt or Moxfield link. Get a full power-level breakdown with card art, prices, and scoring across 7 dimensions.
 
-Paste an **Archidekt** or **Moxfield** link and the app automatically fetches your deck, pulls card art and prices from Scryfall, and scores it across 7 dimensions.
+## 🚀 Deploy to Vercel
 
-## 🚀 How to Deploy (GitHub Pages)
+1. Push this repo to GitHub
+2. [vercel.com](https://vercel.com) → **Add New Project** → import your repo → **Deploy**
+3. Live at `https://your-project.vercel.app` in ~60 seconds
 
-1. **Fork or clone** this repository
-2. Go to your repo → **Settings** → **Pages**
-3. Under *Source*, select `Deploy from a branch` → `main` → `/ (root)`
-4. Click **Save**
-5. Your app will be live at `https://YOUR-USERNAME.github.io/mtg-power-evaluator/`
+> **Why a proxy?** Archidekt and Moxfield hardcode `Access-Control-Allow-Origin: http://localhost:3000`. No browser request from any other origin will ever work directly. `api/deck.js` is a Vercel serverless function that fetches those APIs **server-side** (CORS-free) and relays data to the frontend. Scryfall has open CORS and is fetched directly by the browser.
 
-> GitHub Pages serves over HTTPS which is required for the Archidekt, Moxfield, and Scryfall APIs to work correctly.
+## Project Structure
 
-## 📊 Scoring Methodology (100 points total)
+```
+/
+├── index.html     ← entire frontend, single file
+├── api/
+│   └── deck.js   ← serverless CORS proxy for Archidekt & Moxfield
+└── README.md
+```
 
-| Category | Max | How it's measured |
+## Scoring (100 pts total)
+
+| Category | Pts | Source |
 |---|---|---|
-| **Game Changers** | 18 | Count of WotC official Game Changers list cards |
-| **Est. Salt Sum** | 17 | Sum of EDHREC community salt scores per card |
-| **Deck Value** | 15 | Avg card price from Scryfall (cheapest standard printing, min of Archi/SF to exclude foil inflation) |
-| **Avg CMC** | 15 | Lower mana curve = faster = more powerful |
-| **Ramp** | 12 | Cards that produce extra mana (oracle text + deck tags) |
-| **Card Draw** | 12 | Card advantage spells (oracle text + deck tags) |
-| **Tutors** | 11 | Library search spells (oracle text + deck tags) |
+| Game Changers | 18 | WotC official list |
+| Est. Salt Sum | 17 | EDHREC community scores |
+| Deck Value | 15 | Scryfall cheapest printing (min of Archidekt vs SF price — no foil inflation) |
+| Avg CMC | 15 | Lower = faster = stronger |
+| Ramp | 12 | Oracle text + deck category tags |
+| Card Draw | 12 | Oracle text + deck category tags |
+| Tutors | 11 | Oracle text + deck category tags |
 
-### Power Tiers
+### Tiers: 0–24 🌱 Precon · 25–44 🐾 Casual · 45–62 ⚔️ Upgraded · 63–77 🔥 High Power · 78–100 💀 cEDH-adjacent
 
-| Score | Tier |
-|---|---|
-| 0–24 | 🌱 Precon |
-| 25–44 | 🐾 Casual |
-| 45–62 | ⚔️ Upgraded |
-| 63–77 | 🔥 High Power |
-| 78–100 | 💀 cEDH-adjacent |
+## Notes
+- Decks must be **public**
+- Moxfield also works via the proxy
+- Combo count not included — use [commanderspellbook.com](https://commanderspellbook.com)
 
-### About Price Scoring
-
-Card price is used as a **proxy for power** — expensive staples like Mana Crypt, Imperial Seal, or dual lands tend to be expensive because they're objectively powerful. To avoid counting collectability (foils, special art, old borders), the tool uses the **lowest price** between Archidekt's stored price and Scryfall's standard printing price. This way a $200 foil Demonic Tutor scores the same as a $10 reprint.
-
-## 🎨 Dynamic Color Themes
-
-The UI recolors itself based on the commander's color identity:
-- Boros (RW) → warm reds and gold
-- Dimir (UB) → cold blue-black
-- Golgari (BG) → mossy green-black
-- … 25+ combinations supported
-
-## ⚠️ Notes
-
-- Decks must be **public** on Archidekt/Moxfield
-- Moxfield may have stricter CORS policies — Archidekt works best
-- Ramp/draw counts are estimated from oracle text keyword matching and Archidekt category tags; accuracy improves if your deck uses categories in Archidekt
-- Combo detection is not included (use [Commander Spellbook](https://commanderspellbook.com) for that)
-
-## License
-
-MIT — do whatever you want with it.
+MIT License

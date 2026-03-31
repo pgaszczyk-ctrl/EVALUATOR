@@ -371,7 +371,9 @@ function parseUrl(u){
 
 // ── FETCH ARCHIDEKT ──────────────────────────────────────────────────────────
 async function fetchArchi(id){
-  const r=await fetch(`https://archidekt.com/api/decks/${id}/`,{headers:{'Accept':'application/json'}});
+  // Route through /api/deck proxy to avoid Archidekt's localhost-only CORS header
+  const upstream=encodeURIComponent(`https://archidekt.com/api/decks/${id}/`);
+  const r=await fetch(`/api/deck?url=${upstream}`,{headers:{'Accept':'application/json'}});
   if(!r.ok) throw new Error(`Archidekt returned HTTP ${r.status}. Make sure the deck is set to Public.`);
   const d=await r.json();
   const cards=(d.cards||[]).map(c=>{
@@ -398,10 +400,10 @@ async function fetchArchi(id){
 
 // ── FETCH MOXFIELD ───────────────────────────────────────────────────────────
 async function fetchMox(id){
-  const r=await fetch(`https://api.moxfield.com/v2/decks/all/${id}`,{
-    headers:{'Accept':'application/json','User-Agent':'PowerEDH/2.0'}
-  });
-  if(!r.ok) throw new Error(`Moxfield returned HTTP ${r.status}. Try Archidekt — Moxfield may have stricter CORS.`);
+  // Route through /api/deck proxy (Moxfield also blocks non-localhost CORS)
+  const upstream=encodeURIComponent(`https://api.moxfield.com/v2/decks/all/${id}`);
+  const r=await fetch(`/api/deck?url=${upstream}`,{headers:{'Accept':'application/json'}});
+  if(!r.ok) throw new Error(`Moxfield returned HTTP ${r.status}. Make sure the deck is set to Public.`);
   const d=await r.json();
   const cards=[];
   const push=(e,isCmd=false)=>{

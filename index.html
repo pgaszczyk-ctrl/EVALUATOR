@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerEDH — Commander Deck Evaluator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;900&family=Nunito+Sans:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg1:#0a1808;--bg2:#101e10;
+  --a:#58c058;--a2:#309030;
+  --t:#e0f5e0;--m:#60a060;
+  --pnl:rgba(13,30,14,.88);--bdr:rgba(88,192,88,.2);
+}
+body{
+  min-height:100vh;font-family:'Nunito Sans',sans-serif;color:var(--t);
+  overflow-x:hidden;
+  background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);
+  transition:background .9s ease;
+}
+/* BG card pile */
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bc{position:absolute;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.7);pointer-events:none;display:block}
+#veil{
+  position:fixed;inset:0;z-index:1;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 20%,var(--bg1) 80%);
+  opacity:.85;transition:background .9s;
+}
+/* LAYOUT */
+#app{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 20px}
+/* INPUT SCREEN */
+#is{text-align:center;max-width:600px;width:100%}
+.logo{
+  font-family:'Cinzel',serif;font-size:clamp(30px,7vw,52px);font-weight:900;
+  letter-spacing:3px;line-height:1.1;margin-bottom:8px;
+  color:var(--a);text-shadow:0 0 60px color-mix(in srgb,var(--a) 55%,transparent),0 2px 12px rgba(0,0,0,.8);
+}
+.logo-sub{font-size:clamp(10px,2vw,13px);letter-spacing:5px;opacity:.6;display:block;margin-top:4px}
+.tagline{color:var(--m);font-size:15px;margin:14px 0 32px;line-height:1.6;opacity:.9}
+.url-wrap{
+  display:flex;border-radius:16px;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.55),0 0 0 1px var(--bdr);
+}
+.url-in{
+  flex:1;padding:20px 22px;font-family:'Nunito Sans',sans-serif;font-size:15px;
+  border:none;background:rgba(255,255,255,.07);color:var(--t);outline:none;min-width:0;
+}
+.url-in::placeholder{color:var(--m)}
+.url-btn{
+  padding:20px 28px;background:var(--a);color:#0a1408;border:none;
+  font-family:'Cinzel',serif;font-size:12px;font-weight:900;letter-spacing:2px;
+  cursor:pointer;white-space:nowrap;transition:background .2s,opacity .2s;flex-shrink:0;
+}
+.url-btn:hover{background:var(--a2);color:#fff}
+.url-btn:disabled{opacity:.45;cursor:not-allowed}
+.err{
+  margin-top:16px;padding:14px 20px;background:rgba(200,60,60,.18);
+  border:1px solid rgba(200,60,60,.4);border-radius:10px;font-size:13px;
+  color:#ffaaaa;display:none;line-height:1.7;text-align:left;
+}
+.err code{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:12px}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+#ld{margin-top:18px;font-size:13px;color:var(--m);display:none;animation:pulse 1.5s infinite;letter-spacing:.5px}
+.hint{margin-top:20px;font-size:12px;color:var(--m);opacity:.6;line-height:1.7}
+/* RESULTS */
+#rs{width:100%;max-width:1140px;display:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+#rs{animation:fadeUp .55s ease}
+.back{
+  background:none;border:1px solid var(--bdr);color:var(--m);
+  padding:9px 18px;border-radius:9px;font-family:'Nunito Sans',sans-serif;font-size:13px;
+  cursor:pointer;transition:all .2s;margin-bottom:18px;display:inline-flex;align-items:center;gap:6px;
+}
+.back:hover{border-color:var(--a);color:var(--a)}
+/* panels */
+.pnl{
+  background:var(--pnl);border:1px solid var(--bdr);border-radius:20px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 8px 40px rgba(0,0,0,.45);
+}
+/* header */
+.hdr{padding:22px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px}
+.hdr-title{font-family:'Cinzel',serif;font-size:clamp(15px,2.4vw,23px);font-weight:900;letter-spacing:.5px}
+.hdr-sub{font-size:14px;color:var(--a);margin-top:3px;font-weight:600}
+/* color pips */
+.pips{display:flex;gap:9px;align-items:center}
+.pip{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 10px rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.18);flex-shrink:0}
+.pW{background:#f5f0de;color:#4a3a10}.pU{background:#1a4a90;color:#c8e8ff}
+.pB{background:#1a1230;color:#c0a8e0}.pR{background:#c83020;color:#ffe0d0}
+.pG{background:#1a6a20;color:#c8f5c8}.pC{background:#888;color:#f0f0f0}
+/* main grid */
+.mg{display:grid;grid-template-columns:270px 1fr;gap:18px;margin-bottom:18px}
+@media(max-width:700px){.mg{grid-template-columns:1fr}}
+/* left col */
+.lc{padding:22px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.cmd-img{
+  width:196px;border-radius:14px;display:block;
+  box-shadow:0 14px 50px rgba(0,0,0,.75),0 0 0 2px var(--bdr);
+  transition:transform .3s;cursor:pointer;
+}
+.cmd-img:hover{transform:scale(1.04) rotate(-1.5deg)}
+.statrow{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:11px 16px;background:rgba(255,255,255,.05);border-radius:11px;
+  font-size:14px;border:1px solid rgba(255,255,255,.05);
+}
+.sl{color:var(--m)}.sv{font-weight:700;font-size:16px;color:var(--a)}
+/* right col */
+.rc{padding:26px 28px}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px}
+.sc-lbl{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--m);margin-bottom:5px}
+.big-sc{
+  font-family:'Cinzel',serif;font-size:clamp(56px,9vw,84px);font-weight:900;line-height:1;
+  color:var(--a);text-shadow:0 0 40px color-mix(in srgb,var(--a) 55%,transparent);
+  transition:color .6s,text-shadow .6s;
+}
+.big-sc span{font-size:22px;color:var(--m);font-family:'Nunito Sans',sans-serif;font-weight:400}
+.tier-badge{
+  padding:12px 22px;border-radius:40px;font-family:'Cinzel',serif;font-size:17px;font-weight:700;
+  border:2px solid;display:inline-flex;align-items:center;gap:10px;white-space:nowrap;transition:all .6s;
+}
+/* score band */
+.band{height:12px;border-radius:6px;position:relative;overflow:visible;margin-bottom:8px;
+  background:linear-gradient(90deg,#4a9a4a 0%,#c9a84c 40%,#c07030 65%,#c84040 100%)}
+.needle{
+  position:absolute;top:-5px;width:22px;height:22px;background:#fff;border-radius:50%;
+  transform:translateX(-50%);box-shadow:0 2px 10px rgba(0,0,0,.5);
+  transition:left 1.1s cubic-bezier(.4,0,.2,1),border-color .6s;border:3px solid var(--a);left:0%;
+}
+.tier-lbs{display:flex;justify-content:space-between}
+.tlb{font-size:9px;color:var(--m);letter-spacing:.4px}
+/* detail grid */
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin:18px 0}
+.dc{padding:14px 10px;background:rgba(255,255,255,.04);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+.dv{font-size:24px;font-weight:900;color:var(--a);font-family:'Cinzel',serif}
+.dn{font-size:10px;color:var(--m);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;line-height:1.3}
+/* bars */
+.bars{display:flex;flex-direction:column;gap:13px}
+.brow .bh{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}
+.bn{font-weight:700}.bp{color:var(--a);font-weight:700}
+.bval{color:var(--m);font-weight:400;font-size:12px}
+.bt{height:9px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden}
+.bf{height:100%;border-radius:5px;transition:width 1.2s cubic-bezier(.4,0,.2,1);
+  background:linear-gradient(90deg,var(--a2),var(--a))}
+/* mana curve */
+.curve-pnl{padding:22px 26px;margin-bottom:18px}
+.sec-t{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--m);text-transform:uppercase;margin-bottom:16px}
+.curve-outer{height:100px;display:flex;align-items:flex-end;gap:6px}
+.ccol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.cnum{font-size:12px;color:var(--m);font-weight:700;min-height:18px;display:flex;align-items:center;justify-content:center}
+.cbar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(to top,var(--a2),var(--a));transition:height .9s cubic-bezier(.4,0,.2,1);min-height:0}
+.clbl{font-size:12px;color:var(--m);margin-top:5px;font-weight:600}
+/* price tag */
+.price-note{font-size:11px;color:var(--m);opacity:.6;margin-top:10px;text-align:right}
+/* footer */
+.fnote{text-align:center;font-size:11px;color:rgba(255,255,255,.2);padding-bottom:20px;margin-top:6px;line-height:1.8}
+/* scrollbar */
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="veil"></div>
+<div id="app">
+
+<!-- INPUT -->
+<div id="is">
+  <div class="logo">⚔ PowerEDH<span class="logo-sub">Commander Deck Evaluator</span></div>
+  <div class="tagline">Paste your Archidekt or Moxfield link.<br>We fetch everything — cards, art, prices — automatically.</div>
+  <div class="url-wrap">
+    <input id="url-in" class="url-in" type="text"
+      placeholder="https://archidekt.com/decks/1234567/my_deck"
+      autocomplete="off" spellcheck="false"/>
+    <button id="eval-btn" class="url-btn" onclick="go()">EVALUATE</button>
+  </div>
+  <div id="err-msg" class="err"></div>
+  <div id="ld">Summoning your deck…</div>
+  <div class="hint">
+    Works with public Archidekt &amp; Moxfield decks.<br>
+    Prices use cheapest standard printing from Scryfall (no foils/special editions).
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="rs">
+  <button class="back" onclick="goBack()">← New Deck</button>
+  <div class="pnl hdr">
+    <div>
+      <div class="hdr-title" id="r-name">Deck</div>
+      <div class="hdr-sub" id="r-cmd">Commander</div>
+    </div>
+    <div class="pips" id="r-pips"></div>
+  </div>
+  <div class="mg">
+    <div class="pnl lc">
+      <img id="r-img" class="cmd-img" src="" alt="Commander" onerror="this.style.display='none'">
+      <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+        <div class="statrow"><span class="sl">Cards</span><span class="sv" id="r-cnt">—</span></div>
+        <div class="statrow"><span class="sl">Avg CMC</span><span class="sv" id="r-cmc">—</span></div>
+        <div class="statrow"><span class="sl">Lands</span><span class="sv" id="r-lands">—</span></div>
+        <div class="statrow"><span class="sl">Est. Deck Value</span><span class="sv" id="r-val">—</span></div>
+        <div class="statrow"><span class="sl">Est. Bracket</span><span class="sv" id="r-bkt">—</span></div>
+      </div>
+    </div>
+    <div class="pnl rc">
+      <div class="sc-top">
+        <div>
+          <div class="sc-lbl">Playgroup Power Score</div>
+          <div class="big-sc" id="r-score">0<span>/100</span></div>
+        </div>
+        <div class="tier-badge" id="r-tier">🌱 Precon</div>
+      </div>
+      <div class="band"><div class="needle" id="r-needle"></div></div>
+      <div class="tier-lbs">
+        <span class="tlb">Precon</span><span class="tlb">Casual</span>
+        <span class="tlb">Upgraded</span><span class="tlb">High Power</span>
+        <span class="tlb">cEDH</span>
+      </div>
+      <div class="dg" id="r-dg"></div>
+      <div class="bars" id="r-bars"></div>
+    </div>
+  </div>
+  <div class="pnl curve-pnl">
+    <div class="sec-t">Mana Curve</div>
+    <div class="curve-outer" id="r-curve"></div>
+  </div>
+  <div class="fnote">
+    Scoring: Game Changers (18) · Salt Estimate (17) · Deck Price (15) · Avg CMC (15) · Ramp (12) · Card Draw (12) · Tutors (11) = 100 pts<br>
+    Ramp &amp; draw use oracle text + deck categories. Game Changers from WotC official list. Salt scores from EDHREC community surveys.
+  </div>
+</div>
+
+</div><!-- #app -->
+<script>
+// ── GAME CHANGERS (WotC official list) ──────────────────────────────────────
+const GC = new Set([
+  "Ad Nauseam","Armageddon","Bribery","Capture of Jingzhou","Chain of Smog",
+  "Chrome Mox","Consecrated Sphinx","Contamination","Crop Rotation",
+  "Cyclonic Rift","Deflecting Swat","Demonic Consultation","Demonic Tutor",
+  "Dockside Extortionist","Drannith Magistrate","Elesh Norn, Grand Cenobite",
+  "Expropriate","Fierce Guardianship","Flash","Force of Will","Glacial Chasm",
+  "Green Sun's Zenith","Grim Monolith","Imperial Seal","Intuition",
+  "Jeweled Lotus","Jin-Gitaxias, Core Augur","Jin-Gitaxias, Progress Tyrant",
+  "Land Equilibrium","Mana Crypt","Mana Drain","Mana Vault","Mind Twist",
+  "Mox Diamond","Mystical Tutor","Natural Order","Necropotence",
+  "Opposition Agent","Praetor's Grasp","Rhystic Study","Seedborn Muse",
+  "Sensei's Divining Top","Sheoldred, the Apocalypse","Smothering Tithe",
+  "Stasis","Tainted Pact","Thassa's Oracle","Time Stretch","Time Warp",
+  "Treachery","Underworld Breach","Vampiric Tutor","Vorinclex, Voice of Hunger",
+  "Winter Orb","Worldly Tutor","Zur the Enchanter","Black Market Connections",
+  "Iona, Shield of Emeria","Karn Liberated","Vorinclex, Monstrous Raider"
+]);
+
+// ── SALT SCORES (EDHREC community averages, 0–4 scale) ──────────────────────
+const SALT = {
+  "Stasis":3.06,"Armageddon":2.98,"Winter Orb":2.95,"Cyclonic Rift":2.85,
+  "Rhystic Study":2.82,"Smothering Tithe":2.74,"Mana Crypt":2.70,
+  "Tergrid, God of Fright":2.52,"Expropriate":2.50,"Vorinclex, Voice of Hunger":2.48,
+  "Thassa's Oracle":2.45,"Dockside Extortionist":2.40,"Demonic Tutor":2.38,
+  "Necropotence":2.35,"Opposition Agent":2.32,"Contamination":2.20,
+  "Vampiric Tutor":2.28,"Mana Drain":2.25,"Fierce Guardianship":2.20,
+  "Drannith Magistrate":2.18,"Jin-Gitaxias, Core Augur":2.15,
+  "Glacial Chasm":2.10,"Static Orb":2.08,"Land Equilibrium":2.05,
+  "The Tabernacle at Pendrell Vale":2.05,"Hokori, Dust Drinker":1.90,
+  "Seedborn Muse":1.95,"Consecrated Sphinx":1.92,"Vorinclex, Monstrous Raider":1.92,
+  "Ad Nauseam":1.90,"Elesh Norn, Grand Cenobite":1.85,"Trinisphere":1.85,
+  "Treachery":1.85,"Decree of Annihilation":2.80,"Ravages of War":2.75,
+  "Obliterate":2.65,"Grand Arbiter Augustin IV":1.80,"Time Stretch":1.80,
+  "Sheoldred, the Apocalypse":1.88,"Jin-Gitaxias, Progress Tyrant":1.80,
+  "Bribery":1.78,"Imperial Seal":1.75,"Capture of Jingzhou":1.75,
+  "Praetor's Grasp":1.70,"Zur the Enchanter":1.70,"Flash":1.72,
+  "Iona, Shield of Emeria":2.30,"Mana Vault":1.65,"Grim Monolith":1.58,
+  "Jeweled Lotus":1.60,"Deflecting Swat":1.60,"Mox Diamond":1.55,
+  "Force of Will":1.55,"Chrome Mox":1.45,"Sensei's Divining Top":1.45,
+  "Underworld Breach":1.68,"Tainted Pact":1.62,"Demonic Consultation":1.58,
+  "Mystical Tutor":1.50,"Intuition":1.50,"Natural Order":1.40,
+  "Green Sun's Zenith":1.35,"Worldly Tutor":1.30,"Crop Rotation":1.10,
+  "Sol Ring":0.5,"Black Market Connections":1.50,"Karn Liberated":1.65
+};
+
+// ── COLOR PALETTES ───────────────────────────────────────────────────────────
+const PAL = {
+  '':   {n:'Colorless', bg1:'#111118',bg2:'#181824',a:'#9898c8',a2:'#5858a0',t:'#e0e0f0',m:'#7878a0',p:'rgba(20,20,36,.88)',b:'rgba(150,150,200,.2)'},
+  'W':  {n:'White',     bg1:'#2e2010',bg2:'#3e2c18',a:'#e8c84a',a2:'#c8a020',t:'#fff8e8',m:'#b09860',p:'rgba(54,40,17,.90)',b:'rgba(232,200,74,.28)'},
+  'U':  {n:'Blue',      bg1:'#081428',bg2:'#101c38',a:'#60b0f0',a2:'#3080c8',t:'#d8eeff',m:'#5888b8',p:'rgba(10,22,48,.88)',b:'rgba(96,176,240,.22)'},
+  'B':  {n:'Black',     bg1:'#0c0818',bg2:'#140e24',a:'#9868d0',a2:'#7040b0',t:'#e0d8f8',m:'#6848a0',p:'rgba(18,13,32,.90)',b:'rgba(152,104,208,.22)'},
+  'R':  {n:'Red',       bg1:'#280808',bg2:'#360e08',a:'#f07030',a2:'#c84818',t:'#fff0e0',m:'#a06848',p:'rgba(46,16,10,.88)',b:'rgba(240,112,48,.24)'},
+  'G':  {n:'Green',     bg1:'#0a1808',bg2:'#101e10',a:'#58c058',a2:'#309030',t:'#e0f5e0',m:'#60a060',p:'rgba(13,30,14,.88)',b:'rgba(88,192,88,.22)'},
+  'UW': {n:'Azorius',   bg1:'#0e1e30',bg2:'#182838',a:'#80c0f0',a2:'#e8d070',t:'#e8f4ff',m:'#6888a8',p:'rgba(14,33,54,.88)',b:'rgba(128,192,240,.22)'},
+  'BW': {n:'Orzhov',    bg1:'#18141e',bg2:'#22182a',a:'#d0c098',a2:'#a09070',t:'#f0ece8',m:'#988880',p:'rgba(27,22,34,.90)',b:'rgba(208,192,152,.22)'},
+  'RW': {n:'Boros',     bg1:'#281406',bg2:'#381e08',a:'#f08030',a2:'#e8c030',t:'#fff8e0',m:'#c09050',p:'rgba(46,28,10,.88)',b:'rgba(240,160,48,.30)'},
+  'GW': {n:'Selesnya',  bg1:'#162808',bg2:'#1e3410',a:'#90d060',a2:'#d8d850',t:'#f0fae0',m:'#80a858',p:'rgba(22,42,16,.88)',b:'rgba(144,208,96,.22)'},
+  'BU': {n:'Dimir',     bg1:'#080818',bg2:'#0e0e28',a:'#5060c8',a2:'#7058b8',t:'#d0d8f8',m:'#4858a0',p:'rgba(10,12,38,.90)',b:'rgba(80,96,200,.22)'},
+  'RU': {n:'Izzet',     bg1:'#0c0e2e',bg2:'#1e0c28',a:'#c858f0',a2:'#f07030',t:'#f8f0ff',m:'#9070c0',p:'rgba(17,14,46,.88)',b:'rgba(200,88,240,.22)'},
+  'GU': {n:'Simic',     bg1:'#081a16',bg2:'#0e261e',a:'#40c0a8',a2:'#50c080',t:'#d8fff8',m:'#58a090',p:'rgba(12,28,26,.88)',b:'rgba(64,192,168,.22)'},
+  'BR': {n:'Rakdos',    bg1:'#180808',bg2:'#240810',a:'#e03040',a2:'#a01e80',t:'#ffd8d8',m:'#a04858',p:'rgba(32,11,15,.90)',b:'rgba(224,48,64,.22)'},
+  'BG': {n:'Golgari',   bg1:'#0c1808',bg2:'#0a0c18',a:'#78b040',a2:'#5858a0',t:'#d8f0c8',m:'#608050',p:'rgba(14,26,14,.90)',b:'rgba(120,176,64,.22)'},
+  'GR': {n:'Gruul',     bg1:'#181808',bg2:'#261408',a:'#d08020',a2:'#88aa30',t:'#f8f0c8',m:'#a08840',p:'rgba(28,26,10,.88)',b:'rgba(208,128,32,.28)'},
+  'BGU':{n:'Sultai',    bg1:'#0c1414',bg2:'#0e0c1c',a:'#50b878',a2:'#405890',t:'#c8e8d8',m:'#508868',p:'rgba(13,26,24,.90)',b:'rgba(80,184,120,.22)'},
+  'BGW':{n:'Abzan',     bg1:'#121808',bg2:'#180e08',a:'#b0a030',a2:'#688040',t:'#f0e8c8',m:'#908840',p:'rgba(20,28,13,.90)',b:'rgba(176,160,48,.22)'},
+  'GRW':{n:'Naya',      bg1:'#1e1808',bg2:'#221008',a:'#e09028',a2:'#a0b030',t:'#fff5d8',m:'#c0a050',p:'rgba(38,28,11,.88)',b:'rgba(224,144,40,.28)'},
+  'RUW':{n:'Jeskai',    bg1:'#121626',bg2:'#200e0c',a:'#f06838',a2:'#6090d8',t:'#fff0e8',m:'#a07860',p:'rgba(26,22,40,.90)',b:'rgba(240,104,56,.22)'},
+  'BRU':{n:'Grixis',    bg1:'#0e0810',bg2:'#180808',a:'#9038c0',a2:'#c03050',t:'#f0d8ff',m:'#805090',p:'rgba(20,12,26,.90)',b:'rgba(144,56,192,.22)'},
+  'GRU':{n:'Temur',     bg1:'#0c1c14',bg2:'#181808',a:'#38c888',a2:'#e07028',t:'#d8fff0',m:'#50a878',p:'rgba(13,32,20,.88)',b:'rgba(56,200,136,.22)'},
+  'BRW':{n:'Mardu',     bg1:'#180a0c',bg2:'#1a1208',a:'#d85828',a2:'#c81830',t:'#ffe8e0',m:'#b06858',p:'rgba(28,12,16,.90)',b:'rgba(216,88,40,.22)'},
+  'GUW':{n:'Bant',      bg1:'#0e1c0e',bg2:'#0e1828',a:'#68d870',a2:'#5090d0',t:'#e8ffe8',m:'#68a870',p:'rgba(13,30,18,.88)',b:'rgba(104,216,112,.22)'},
+  'GBR':{n:'Jund',      bg1:'#180e08',bg2:'#100c10',a:'#d07818',a2:'#408030',t:'#f8e8c0',m:'#a08040',p:'rgba(27,18,11,.90)',b:'rgba(208,120,24,.22)'},
+  'BUW':{n:'Esper',     bg1:'#10101e',bg2:'#1a1628',a:'#a060d8',a2:'#90b0e0',t:'#e8e0ff',m:'#7868b0',p:'rgba(17,15,36,.90)',b:'rgba(160,96,216,.22)'},
+  'GBU':{n:'Sultai',    bg1:'#0c1414',bg2:'#0e0c1c',a:'#50b878',a2:'#405890',t:'#c8e8d8',m:'#508868',p:'rgba(13,26,24,.90)',b:'rgba(80,184,120,.22)'},
+};
+function getPal(ci){
+  const k=[...ci].sort().join('');
+  if(PAL[k]) return PAL[k];
+  if(ci.length>=4) return{n:'Five-Color',bg1:'#1a1418',bg2:'#14181a',a:'#d0a030',a2:'#8060a8',t:'#f5f0e0',m:'#a09080',p:'rgba(30,24,28,.90)',b:'rgba(208,160,48,.25)'};
+  const fallbacks=['G','U','R','B','W'];
+  for(const c of ci){if(PAL[c]) return PAL[c];}
+  return PAL['G'];
+}
+function applyPal(p){
+  const r=document.documentElement;
+  ['--bg1','--bg2','--a','--a2','--t','--m','--pnl','--bdr'].forEach((v,i)=>{
+    r.style.setProperty(v,[p.bg1,p.bg2,p.a,p.a2,p.t,p.m,p.p,p.b][i]);
+  });
+  document.body.style.background=`linear-gradient(135deg,${p.bg1} 0%,${p.bg2} 100%)`;
+  document.getElementById('veil').style.background=
+    `radial-gradient(ellipse 80% 80% at 50% 50%,transparent 20%,${p.bg1} 80%)`;
+}
+
+// ── TIERS ────────────────────────────────────────────────────────────────────
+const TIERS=[
+  {min:0, max:24, label:'Precon',        emoji:'🌱',color:'#5a9a5a'},
+  {min:25,max:44, label:'Casual',        emoji:'🐾',color:'#4880c8'},
+  {min:45,max:62, label:'Upgraded',      emoji:'⚔️', color:'#c8a84c'},
+  {min:63,max:77, label:'High Power',    emoji:'🔥',color:'#d07030'},
+  {min:78,max:100,label:'cEDH-adjacent', emoji:'💀',color:'#c84040'},
+];
+const getTier=s=>TIERS.find(t=>s>=t.min&&s<=t.max)||TIERS[0];
+
+// ── BACKGROUND CARD PILE ─────────────────────────────────────────────────────
+function showCards(imgs){
+  const bg=document.getElementById('bg');bg.innerHTML='';
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const shuffled=[...imgs].sort(()=>Math.random()-.5).slice(0,40);
+  shuffled.forEach(src=>{
+    const el=document.createElement('img');
+    el.className='bc';el.src=src;el.alt='';el.loading='lazy';
+    const w=90+Math.random()*100;
+    el.style.cssText=`
+      left:${Math.random()*(vw-w)}px;
+      top:${Math.random()*(vh-200)}px;
+      width:${w}px;
+      transform:rotate(${(Math.random()-.5)*60}deg);
+      opacity:${.12+Math.random()*.22};
+      z-index:${Math.floor(Math.random()*10)};
+    `;
+    el.onerror=()=>el.remove();
+    bg.appendChild(el);
+  });
+}
+
+// ── URL PARSING ──────────────────────────────────────────────────────────────
+function parseUrl(u){
+  let m=u.match(/archidekt\.com\/decks\/(\d+)/);
+  if(m) return{src:'archidekt',id:m[1]};
+  m=u.match(/moxfield\.com\/decks\/([a-zA-Z0-9_-]+)/);
+  if(m) return{src:'moxfield',id:m[1]};
+  return null;
+}
+
+// ── FETCH ARCHIDEKT ──────────────────────────────────────────────────────────
+async function fetchArchi(id){
+  const r=await fetch(`https://archidekt.com/api/decks/${id}/`,{headers:{'Accept':'application/json'}});
+  if(!r.ok) throw new Error(`Archidekt returned HTTP ${r.status}. Make sure the deck is set to Public.`);
+  const d=await r.json();
+  const cards=(d.cards||[]).map(c=>{
+    const oc=c.card?.oracleCard||{};
+    const cats=(c.categories||[]).map(s=>s.toLowerCase());
+    const types=(oc.types||[]).map(s=>s.toLowerCase());
+    const oracle=(oc.oracleText||'').toLowerCase();
+    const archiPrice=parseFloat(c.card?.prices?.usd||c.card?.prices?.usdFoil||0)||0;
+    return{
+      name:oc.name||'Unknown',cmc:oc.cmc||0,ci:oc.colorIdentity||[],
+      types,oracle,
+      isLand:types.includes('land'),
+      isCmd:cats.includes('commander'),
+      sid:c.card?.uid||null,
+      archiPrice,
+      isRamp:cats.some(s=>/ramp|mana accel/i.test(s))||(oracle.includes('add {')&&!types.includes('land'))||oracle.includes('add one mana')||oracle.includes('add two mana')||oracle.includes('add three mana'),
+      isDraw:cats.some(s=>/draw|card draw|card advantage/i.test(s))||(oracle.includes('draw a card')||oracle.includes('draw two cards')||oracle.includes('draw three cards')||oracle.includes('draw x cards')||oracle.includes('draw cards')),
+      isTutor:cats.some(s=>/tutor/i.test(s))||oracle.includes('search your library for'),
+    };
+  });
+  const cmd=cards.find(c=>c.isCmd)||cards[0];
+  return{cards,cmd,deckName:d.name||'Unnamed Deck',colors:cmd?.ci||[]};
+}
+
+// ── FETCH MOXFIELD ───────────────────────────────────────────────────────────
+async function fetchMox(id){
+  const r=await fetch(`https://api.moxfield.com/v2/decks/all/${id}`,{
+    headers:{'Accept':'application/json','User-Agent':'PowerEDH/2.0'}
+  });
+  if(!r.ok) throw new Error(`Moxfield returned HTTP ${r.status}. Try Archidekt — Moxfield may have stricter CORS.`);
+  const d=await r.json();
+  const cards=[];
+  const push=(e,isCmd=false)=>{
+    const c=e.card||{};
+    const tl=(c.type_line||'').toLowerCase();
+    const oracle=(c.oracle_text||'').toLowerCase();
+    cards.push({
+      name:c.name||'Unknown',cmc:c.cmc||0,ci:c.color_identity||[],
+      types:[tl],oracle,isLand:tl.includes('land'),isCmd,
+      sid:c.scryfall_id||null,archiPrice:0,
+      isRamp:oracle.includes('add {')||oracle.includes('add one mana'),
+      isDraw:oracle.includes('draw a card')||oracle.includes('draw cards'),
+      isTutor:oracle.includes('search your library for'),
+    });
+  };
+  Object.values(d.commanders||{}).forEach(e=>push(e,true));
+  Object.values(d.mainboard||{}).forEach(e=>push(e,false));
+  const cmd=cards.find(c=>c.isCmd)||cards[0];
+  return{cards,cmd,deckName:d.name||'Unnamed',colors:cmd?.ci||[]};
+}
+
+// ── SCRYFALL: batch collection ───────────────────────────────────────────────
+// Returns map: { cardName -> { imgUrl, price } }
+async function scryfallCollection(names){
+  const map={};
+  // Batch in groups of 75
+  for(let i=0;i<names.length;i+=75){
+    const batch=names.slice(i,i+75);
+    try{
+      const r=await fetch('https://api.scryfall.com/cards/collection',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({identifiers:batch.map(n=>({name:n}))})
+      });
+      const data=await r.json();
+      (data.data||[]).forEach(c=>{
+        // Image: prefer normal size
+        const img=c.image_uris?.normal||c.image_uris?.small||
+                  c.card_faces?.[0]?.image_uris?.normal||'';
+        // Price: use non-foil USD, fallback EUR*1.1, then 0
+        const usd=parseFloat(c.prices?.usd||'0')||0;
+        const eur=parseFloat(c.prices?.eur||'0')||0;
+        const price=usd>0?usd:(eur>0?eur*1.1:0);
+        map[c.name]={img,price};
+      });
+    }catch{}
+    // Small delay between batches to respect rate limit
+    if(i+75<names.length) await new Promise(res=>setTimeout(res,150));
+  }
+  return map;
+}
+
+// ── SCRYFALL: single card ────────────────────────────────────────────────────
+async function scryfallSingle(sid,name){
+  try{
+    const url=sid
+      ?`https://api.scryfall.com/cards/${sid}`
+      :`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(name)}`;
+    const r=await fetch(url);const d=await r.json();
+    return d.image_uris?.large||d.image_uris?.normal||
+           d.card_faces?.[0]?.image_uris?.large||d.card_faces?.[0]?.image_uris?.normal||'';
+  }catch{return'';}
+}
+
+// ── SCORE CALCULATION ────────────────────────────────────────────────────────
+function calcScores(cards, priceMap){
+  const nonLand=cards.filter(c=>!c.isLand&&!c.isCmd);
+  const land=cards.filter(c=>c.isLand);
+
+  // Avg CMC
+  const avgCmc=nonLand.length
+    ?nonLand.reduce((s,c)=>s+(c.cmc||0),0)/nonLand.length:0;
+
+  // Game changers
+  const gcCnt=cards.filter(c=>GC.has(c.name)).length;
+
+  // Salt
+  const saltSum=cards.reduce((s,c)=>s+(SALT[c.name]||0),0);
+
+  // Ramp / draw / tutors
+  const ramp=cards.filter(c=>c.isRamp&&!c.isLand).length;
+  const draw=cards.filter(c=>c.isDraw).length;
+  const tutor=cards.filter(c=>c.isTutor).length;
+
+  // ── PRICE SCORING ──
+  // For each non-land card, get the cheapest printing price.
+  // We use Archidekt's price if available (specific printing the user has),
+  // otherwise Scryfall's price for the standard printing.
+  // This measures the card's market value as a proxy for power.
+  const prices=nonLand.map(c=>{
+    const sf=priceMap[c.name]?.price||0;
+    // Use the lower of Archidekt price vs Scryfall, ignoring 0s
+    // (Archi price might be a foil/special edition which inflates the value)
+    const archi=c.archiPrice||0;
+    if(archi>0&&sf>0) return Math.min(archi,sf); // take cheaper to avoid foil inflation
+    return sf||archi||0;
+  }).filter(p=>p>0);
+
+  const totalVal=prices.length?prices.reduce((s,p)=>s+p,0):0;
+  const avgPrice=prices.length?totalVal/prices.length:0;
+  // Estimate full deck value by scaling from sampled cards
+  const estDeckVal=Math.round(totalVal*(nonLand.length/Math.max(prices.length,1)));
+
+  // Bracket estimate
+  let bkt=2;
+  if(gcCnt===0&&tutor===0&&avgCmc>3) bkt=1;
+  else if(gcCnt===0&&tutor<=1) bkt=2;
+  else if(gcCnt>=1||tutor>=3) bkt=3;
+  if(gcCnt>=3||(tutor>=5&&gcCnt>=2)||avgCmc<2.2) bkt=Math.max(bkt,4);
+
+  // Mana curve (non-land, non-commander)
+  const curve=[0,1,2,3,4,5,6].map(n=>({
+    lbl:n===6?'6+':String(n),
+    cnt:nonLand.filter(c=>n===6?(c.cmc||0)>=6:Math.floor(c.cmc||0)===n).length
+  }));
+
+  // ── SUBSCORES (sum = 100) ──
+  const sub={
+    gameChangers:{
+      pts:Math.min(18,gcCnt*4),max:18,
+      lbl:'Game Changers',val:gcCnt
+    },
+    salt:{
+      pts:saltSum<=6?3:saltSum<=18?7:saltSum<=36?11:saltSum<=58?15:17,
+      max:17,lbl:'Est. Salt Sum',val:saltSum.toFixed(1)
+    },
+    deckPrice:{
+      pts:avgPrice<0.4?1:avgPrice<1?3:avgPrice<2.5?6:avgPrice<5?9:avgPrice<10?12:15,
+      max:15,lbl:'Deck Value',
+      val:estDeckVal>0?`~$${estDeckVal}`:'n/a'
+    },
+    avgCmc:{
+      pts:avgCmc>=4?2:avgCmc>=3.3?5:avgCmc>=2.8?9:avgCmc>=2.3?12:15,
+      max:15,lbl:'Avg CMC',val:avgCmc.toFixed(2)
+    },
+    ramp:{
+      pts:ramp<=4?2:ramp<=8?5:ramp<=12?9:12,
+      max:12,lbl:'Ramp',val:ramp
+    },
+    draw:{
+      pts:draw<=4?2:draw<=8?5:draw<=12?9:12,
+      max:12,lbl:'Card Draw',val:draw
+    },
+    tutors:{
+      pts:tutor===0?0:tutor<=2?3:tutor<=4?7:tutor<=6?9:11,
+      max:11,lbl:'Tutors',val:tutor
+    },
+  };
+
+  const tot=Object.values(sub).reduce((s,v)=>s+v.pts,0);
+  const mx=Object.values(sub).reduce((s,v)=>s+v.max,0);
+  const score=Math.round((tot/mx)*100);
+
+  return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,bkt,
+         landCnt:land.length,cardCnt:cards.length,curve,
+         avgPrice,estDeckVal};
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function render(deck,sc,cmdImg,sfMap){
+  const {cmd,deckName,colors}=deck;
+  const pal=getPal(colors);
+  applyPal(pal);
+
+  // background
+  const imgs=Object.values(sfMap).map(v=>v.img).filter(Boolean);
+  showCards(imgs);
+
+  // header
+  document.getElementById('r-name').textContent=deckName;
+  document.getElementById('r-cmd').textContent=`${cmd.name} · ${pal.n}`;
+
+  // pips
+  const pipsEl=document.getElementById('r-pips');pipsEl.innerHTML='';
+  const sym={W:'☀',U:'💧',B:'💀',R:'🔥',G:'🌿',C:'◇'};
+  (colors.length?colors:['C']).forEach(c=>{
+    const p=document.createElement('div');
+    p.className=`pip p${c}`;p.textContent=sym[c]||c;
+    pipsEl.appendChild(p);
+  });
+
+  // commander image
+  if(cmdImg){document.getElementById('r-img').src=cmdImg;document.getElementById('r-img').style.display='block';}
+
+  // stats
+  document.getElementById('r-cnt').textContent=sc.cardCnt;
+  document.getElementById('r-cmc').textContent=sc.avgCmc.toFixed(2);
+  document.getElementById('r-lands').textContent=sc.landCnt;
+  document.getElementById('r-val').textContent=sc.estDeckVal>0?`~$${sc.estDeckVal}`:'—';
+  document.getElementById('r-bkt').textContent=`Bracket ${sc.bkt}`;
+
+  // big score
+  const tier=getTier(sc.score);
+  const sel=document.getElementById('r-score');
+  sel.innerHTML=`${sc.score}<span>/100</span>`;
+  sel.style.color=tier.color;sel.style.textShadow=`0 0 45px ${tier.color}88`;
+  const tdg=document.getElementById('r-tier');
+  tdg.textContent=`${tier.emoji} ${tier.label}`;
+  tdg.style.color=tier.color;tdg.style.borderColor=tier.color;
+  tdg.style.background=tier.color+'22';
+
+  // needle
+  setTimeout(()=>{
+    const nd=document.getElementById('r-needle');
+    nd.style.left=`${sc.score}%`;nd.style.borderColor=tier.color;
+  },200);
+
+  // detail grid
+  const dg=document.getElementById('r-dg');dg.innerHTML='';
+  [
+    {v:sc.gcCnt,n:'Game Changers'},{v:sc.saltSum.toFixed(0),n:'Est. Salt Sum'},
+    {v:sc.ramp,n:'Ramp Pieces'},{v:sc.draw,n:'Draw Spells'},
+    {v:sc.tutor,n:'Tutors'},
+    {v:sc.estDeckVal>0?`$${sc.estDeckVal}`:'n/a',n:'Est. Deck $'},
+  ].forEach(d=>{
+    dg.insertAdjacentHTML('beforeend',
+      `<div class="dc"><div class="dv">${d.v}</div><div class="dn">${d.n}</div></div>`);
+  });
+
+  // bars
+  const barsEl=document.getElementById('r-bars');barsEl.innerHTML='';
+  Object.values(sc.sub).forEach(s=>{
+    const pct=Math.round((s.pts/s.max)*100);
+    barsEl.insertAdjacentHTML('beforeend',`
+      <div class="brow">
+        <div class="bh">
+          <span class="bn">${s.lbl}</span>
+          <span class="bp">${s.pts}<span class="bval">/${s.max} pts</span>
+          &nbsp;·&nbsp;<span class="bval">${s.val}</span></span>
+        </div>
+        <div class="bt"><div class="bf" style="width:0%" data-t="${pct}%"></div></div>
+      </div>`);
+  });
+  setTimeout(()=>{
+    document.querySelectorAll('.bf').forEach(el=>{el.style.width=el.dataset.t;});
+  },300);
+
+  // mana curve
+  const curveEl=document.getElementById('r-curve');curveEl.innerHTML='';
+  const mx=Math.max(...sc.curve.map(d=>d.cnt),1);
+  sc.curve.forEach(d=>{
+    const h=Math.round((d.cnt/mx)*72);
+    curveEl.insertAdjacentHTML('beforeend',`
+      <div class="ccol">
+        <div class="cnum">${d.cnt>0?d.cnt:''}</div>
+        <div class="cbar" style="height:${h}px"></div>
+        <div class="clbl">${d.lbl}</div>
+      </div>`);
+  });
+}
+
+// ── MAIN ─────────────────────────────────────────────────────────────────────
+async function go(){
+  const url=document.getElementById('url-in').value.trim();
+  const btn=document.getElementById('eval-btn');
+  const err=document.getElementById('err-msg');
+  const ld=document.getElementById('ld');
+  err.style.display='none';
+
+  const parsed=parseUrl(url);
+  if(!parsed){
+    err.textContent='Please enter a valid Archidekt or Moxfield deck URL.';
+    err.style.display='block';return;
+  }
+
+  btn.disabled=true;ld.style.display='block';
+
+  try{
+    ld.textContent='📡 Fetching deck list…';
+    let deck;
+    if(parsed.src==='archidekt') deck=await fetchArchi(parsed.id);
+    else deck=await fetchMox(parsed.id);
+
+    ld.textContent='🃏 Fetching card art & prices from Scryfall…';
+    // Fetch ALL non-land cards (commander excluded) for images + prices
+    const allNonLand=deck.cards.filter(c=>!c.isLand&&!c.isCmd).map(c=>c.name);
+    const sfMap=await scryfallCollection(allNonLand);
+
+    ld.textContent='🎨 Loading commander art…';
+    const cmdImg=await scryfallSingle(deck.cmd?.sid,deck.cmd?.name||'');
+
+    ld.textContent='⚡ Calculating scores…';
+    const sc=calcScores(deck.cards,sfMap);
+
+    document.getElementById('is').style.display='none';
+    document.getElementById('rs').style.display='block';
+    render(deck,sc,cmdImg,sfMap);
+
+  }catch(e){
+    console.error(e);
+    err.innerHTML=`⚠️ <strong>${e.message}</strong>`;
+    err.style.display='block';
+  }finally{
+    btn.disabled=false;ld.style.display='none';
+  }
+}
+
+function goBack(){
+  document.getElementById('rs').style.display='none';
+  document.getElementById('is').style.display='block';
+  document.getElementById('bg').innerHTML='';
+  applyPal(PAL['G']);
+}
+
+document.getElementById('url-in').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+</script>
+</body>
+</html>

@@ -597,11 +597,18 @@ async function scryfallBatch(names){
                   c.card_faces?.[0]?.image_uris?.normal||'';
         const imgLg=c.image_uris?.large||c.image_uris?.normal||
                     c.card_faces?.[0]?.image_uris?.large||img;
-        // Back face for double-faced cards (DFC)
+        // Back face for double-faced cards (DFC / MDFC / transform)
         const imgBack=c.card_faces?.[1]?.image_uris?.normal||
                       c.card_faces?.[1]?.image_uris?.large||'';
         const price=parseFloat(c.prices?.usd||'0')||0;
-        map[c.name]={img,imgLg,imgBack,price};
+        const entry={img,imgLg,imgBack,price};
+        map[c.name]=entry;
+        // KEY FIX: Scryfall returns full DFC name "Front // Back" but Archidekt
+        // and Moxfield store only the front face name. Add alias so lookups work.
+        if(c.name.includes(' // ')){
+          const frontName=c.name.split(' // ')[0];
+          if(!map[frontName]) map[frontName]=entry;
+        }
       }
       if(data.not_found?.length)
         console.warn('Scryfall not found:',data.not_found.map(x=>x.name||JSON.stringify(x)));
@@ -609,6 +616,24 @@ async function scryfallBatch(names){
     if(i+75<unique.length)await new Promise(r=>setTimeout(r,100));
   }
   return map;
+}
+
+// ── SCRYFALL SINGLE CARD (for commander fallback) ─────────────────────────────
+// Used when the batch didn't capture the commander's back face (name mismatch edge cases)
+async function scryfallSingle(name){
+  try{
+    const r=await fetch(
+      `https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(name)}`
+    );
+    if(!r.ok) return null;
+    const c=await r.json();
+    return{
+      img:    c.image_uris?.normal||c.image_uris?.large||c.card_faces?.[0]?.image_uris?.normal||'',
+      imgLg:  c.image_uris?.large||c.image_uris?.normal||c.card_faces?.[0]?.image_uris?.large||'',
+      imgBack:c.card_faces?.[1]?.image_uris?.normal||c.card_faces?.[1]?.image_uris?.large||'',
+      price:  parseFloat(c.prices?.usd||'0')||0,
+    };
+  }catch{return null;}
 }
 
 // ── SPLASH ─────────────────────────────────────────────────────────────────────
@@ -917,6 +942,14 @@ async function go(){
     const nonLandNames=[...new Set(deck.cards.filter(c=>!c.isLand).map(c=>c.name))];
     ld.textContent=`🃏 Fetching art & prices (${nonLandNames.length} unique cards)…`;
     const sfMap=await scryfallBatch(nonLandNames);
+
+    // Ensure commander is resolved — if batch missed it (DFC name mismatch),
+    // do a dedicated fuzzy lookup which is guaranteed to return card_faces
+    if(deck.cmd&&!sfMap[deck.cmd.name]?.img){
+      ld.textContent='🎴 Fetching commander art…';
+      const cmdData=await scryfallSingle(deck.cmd.name);
+      if(cmdData) sfMap[deck.cmd.name]=cmdData;
+    }
 
     ld.textContent='⚡ Calculating power level…';
     const sc=calcScores(deck.cards,sfMap);

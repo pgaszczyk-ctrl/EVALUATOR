@@ -61,7 +61,47 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
 .audit-card-reason{font-size:11px;color:rgba(255,160,140,1);line-height:1.4;font-style:italic}
 .audit-none{font-size:13px;color:var(--m);opacity:.6;padding:4px 0}
 
-/* ── MOBILE ── */
+/* ── HISTORY / FAVOURITES ── */
+#history-section{width:100%;max-width:600px;margin-top:28px}
+.hist-header{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;color:var(--m);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.hist-clear{background:none;border:none;color:var(--m);font-size:11px;cursor:pointer;
+  opacity:.5;transition:opacity .15s;letter-spacing:.5px}
+.hist-clear:hover{opacity:1}
+.hist-tabs{display:flex;gap:8px;margin-bottom:14px}
+.hist-tab{background:none;border:1px solid var(--bdr);color:var(--m);padding:5px 14px;
+  border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s;font-family:'Nunito Sans',sans-serif}
+.hist-tab.active{border-color:var(--a);color:var(--a);background:rgba(var(--a),.08)}
+.hist-list{display:flex;flex-direction:column;gap:8px}
+.hist-item{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:12px;
+  cursor:pointer;transition:all .2s;position:relative;
+}
+.hist-item:hover{border-color:var(--a);background:rgba(255,255,255,.07)}
+.hist-img{
+  width:38px;height:54px;border-radius:5px;object-fit:cover;object-position:top;
+  flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.6);display:block;
+}
+.hist-img-ph{width:38px;height:54px;border-radius:5px;background:rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-name{font-size:14px;font-weight:700;color:var(--t);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.hist-cmd{font-size:11px;color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-score{
+  font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--a);
+  flex-shrink:0;min-width:36px;text-align:right;
+}
+.hist-fav{
+  background:none;border:none;font-size:20px;cursor:pointer;line-height:1;
+  flex-shrink:0;padding:4px;transition:transform .2s;opacity:.6;
+}
+.hist-fav:hover{transform:scale(1.2);opacity:1}
+.hist-fav.active{opacity:1}
+.hist-time{font-size:10px;color:var(--m);opacity:.45;margin-top:2px}
+.hist-empty{text-align:center;color:var(--m);opacity:.4;font-size:13px;padding:16px 0}
+
 @media(max-width:680px){
   .mg{grid-template-columns:1fr}
   .ai-grid{grid-template-columns:1fr}
@@ -404,6 +444,19 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   <div id="err-msg" class="err"></div>
   <div id="ld">Summoning your deck…</div>
   <div class="hint">Decks must be public · Prices from Scryfall (non-foil USD) · Archidekt recommended</div>
+
+  <!-- HISTORY / FAVOURITES -->
+  <div id="history-section" style="display:none">
+    <div class="hist-header">
+      <div>Recent &amp; Favourites</div>
+      <button class="hist-clear" onclick="clearHistory()">Clear history</button>
+    </div>
+    <div class="hist-tabs">
+      <button class="hist-tab active" id="tab-all" onclick="switchTab('all')">All recent</button>
+      <button class="hist-tab" id="tab-fav" onclick="switchTab('fav')">⭐ Favourites</button>
+    </div>
+    <div class="hist-list" id="hist-list"></div>
+  </div>
 </div>
 
 <!-- RESULTS -->
@@ -418,9 +471,12 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
         <div class="hdr-title" id="r-name">Deck</div>
         <div class="hdr-sub" id="r-cmd">Commander</div>
       </div>
-      <div class="color-id">
-        <div class="pips" id="r-pips"></div>
-        <div class="guild-name" id="r-guild"></div>
+      <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:10">
+        <button class="hist-fav" id="r-fav-btn" onclick="toggleCurrentFav()" title="Add to favourites">☆</button>
+        <div class="color-id">
+          <div class="pips" id="r-pips"></div>
+          <div class="guild-name" id="r-guild"></div>
+        </div>
       </div>
     </div>
 
@@ -497,8 +553,8 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
         <div class="ai-gameplan" id="ai-gameplan"></div>
         <div class="ai-grid" id="ai-grid"></div>
       </div>
-      <div style="font-size:11px;color:var(--m);opacity:.35;margin-top:10px">
-        Powered by Claude · Score weights adjusted per deck strategy · Key at console.anthropic.com → ANTHROPIC_API_KEY in Vercel env vars
+      <div style="font-size:11px;color:var(--m);opacity:.35;margin-top:10px" id="ai-provider-note">
+        Powered by AI · Score weights adjusted per deck strategy · FREE: add GOOGLE_API_KEY from aistudio.google.com → Get API key · Paid: ANTHROPIC_API_KEY from console.anthropic.com
       </div>
     </div>
 
@@ -511,8 +567,8 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
     </div>
 
     <div class="fnote">
-      Score: Game Changers (18) · Salt (17) · Deck Value (15) · Avg CMC (15) · Ramp (12) · Card Draw (12) · Tutors (11) → 1–10<br>
-      Prices: Scryfall non-foil USD. Click any category name to see its cards. Recursion is shown as a stat but not scored (it overlaps draw).
+      Score: Game Changers (20) · Tutors (20) · Salt (14) · Avg CMC (14) · Interaction (9) · Card Draw (9) · Ramp (7) · Value (7) + Coherence Bonus → 1–10<br>
+      Tutors and Game Changers weighted highest — they predict actual win rates far better than ramp/draw counts.
     </div>
   </div>
 </div>
@@ -865,6 +921,8 @@ async function fetchArchi(id){
              ||/draw a card|draw two cards|draw three cards|draw four cards|draw x cards|draw cards|you draw/.test(oracle),
       isRecursion:cats.some(s=>/recur|recursion|reani/i.test(s))
              ||/from your graveyard to (your hand|the battlefield)|return target.*from.*graveyard|return.*graveyard.*to (your hand|the battlefield)/.test(oracle),
+      isInteraction:cats.some(s=>/interact|removal|counter|wipe/i.test(s))
+             ||/counter target (spell|creature|permanent|instant|sorcery|ability)|destroy target|exile target (creature|permanent|artifact|enchantment)|each opponent sacrifices|return all|destroy all|exile all/.test(oracle),
       isTutor:cats.some(s=>/tutor/i.test(s))||oracle.includes('search your library for'),
     });
   }
@@ -901,6 +959,7 @@ async function fetchMox(id){
         isRamp:oracle.includes('add {')||/add one mana|add two mana/.test(oracle),
         isDraw:/draw a card|draw two cards|draw three cards|draw x cards|draw cards|you draw/.test(oracle),
         isRecursion:/from your graveyard to (your hand|the battlefield)|return target.*from.*graveyard|return.*graveyard.*to (your hand|the battlefield)/.test(oracle),
+        isInteraction:/counter target (spell|creature|permanent|instant|sorcery)|destroy target|exile target (creature|permanent|artifact|enchantment)|each opponent sacrifices|destroy all|exile all|return all/.test(oracle),
         isTutor:oracle.includes('search your library for'),
       });
     }
@@ -934,7 +993,9 @@ function calcScores(cards,sfMap){
   const drawList=nonLandUniq.filter(c=>c.isDraw);
   const tutorList=nonLandUniq.filter(c=>c.isTutor);
   const recursionList=nonLandUniq.filter(c=>c.isRecursion);
-  const ramp=rampList.length,draw=drawList.length,tutor=tutorList.length,recursion=recursionList.length;
+  const interactionList=nonLandUniq.filter(c=>c.isInteraction);
+  const ramp=rampList.length, draw=drawList.length, tutor=tutorList.length;
+  const recursion=recursionList.length, interaction=interactionList.length;
 
   // ── THEME / PLAN DETECTION ─────────────────────────────────────────────────
   // Heuristic keyword analysis across all non-land oracle text
@@ -1009,33 +1070,93 @@ function calcScores(cards,sfMap){
   const aiWeights={
     gameChangers:wt('gameChangers'),salt:wt('salt'),deckPrice:wt('deckPrice'),
     avgCmc:wt('avgCmc'),ramp:wt('ramp'),draw:wt('draw'),tutors:wt('tutors'),
+    interaction:wt('interaction'),
   };
   const aiWeightReasons=window._aiData?.weightReasons||{};
   const aiKpis=window._aiData?.aiKpis||[];
   const aiAdjusted=window._aiData!=null;
 
-  // Base sub-scores, then apply weights
+  // ── REDESIGNED BASE SCORING ────────────────────────────────────────────────
+  // Philosophy: tutors × game changers = ability to WIN, not just have good cards.
+  // A deck with 6 tutors + 3 GCs beats a deck with 15 ramp + 12 draw every time.
+  // Ramp/draw are table stakes — they don't differentiate winners from losers.
+  //
+  // New max distribution (sums to 100):
+  // Game Changers: 20  — actual win conditions / oppressive engines
+  // Tutors:        20  — consistency / finding your plan (most predictive of wins)
+  // Salt:          14  — how much the deck disrupts / oppresses
+  // Avg CMC:       14  — speed; low CMC = fast wins
+  // Interaction:    9  — counters + removal; protecting your strategy
+  // Card Draw:      9  — table stakes but needed
+  // Ramp:           7  — needed but far overweighted in old system
+  // Deck Value:     7  — card quality proxy
+  // = 100 raw pts + coherence bonus below
+
   const baseSub={
-    gameChangers:{bPts:Math.min(18,gcCnt*4),max:18,lbl:'Game Changers',val:gcCnt,key:'gameChangers'},
-    salt:{bPts:saltSum<=6?3:saltSum<=18?7:saltSum<=36?11:saltSum<=58?15:17,max:17,lbl:'Est. Salt',val:saltSum.toFixed(1),key:'salt'},
-    deckPrice:{
-      bPts:avgPrice<0.4?1:avgPrice<1?3:avgPrice<2.5?6:avgPrice<5?9:avgPrice<10?12:15,
-      max:15,lbl:'Deck Value',val:estDeckVal>0?`~$${estDeckVal.toLocaleString()}`:'—',key:'deckPrice'
+    // ★ WIN CONDITIONS — each Game Changer is a potential game-ender
+    gameChangers:{
+      bPts:Math.min(20,gcCnt*5),
+      max:20,lbl:'Game Changers',val:gcCnt,key:'gameChangers'
     },
-    avgCmc:{bPts:avgCmc>=4?2:avgCmc>=3.3?5:avgCmc>=2.8?9:avgCmc>=2.3?12:15,max:15,lbl:'Avg CMC',val:avgCmc.toFixed(2),key:'avgCmc'},
-    ramp:{bPts:ramp===0?0:ramp<=4?2:ramp<=8?5:ramp<=12?9:12,max:12,lbl:'Ramp',val:ramp,key:'ramp'},
-    draw:{bPts:draw===0?0:draw<=4?2:draw<=8?5:draw<=12?9:12,max:12,lbl:'Card Draw',val:draw,key:'draw'},
-    tutors:{bPts:tutor===0?0:tutor<=2?3:tutor<=4?7:tutor<=6?9:11,max:11,lbl:'Tutors',val:tutor,key:'tutors'},
+    // ★ CONSISTENCY — tutors transform a deck from lucky to reliable
+    tutors:{
+      bPts:tutor===0?0:tutor<=1?4:tutor<=3?9:tutor<=5?14:tutor<=7?17:20,
+      max:20,lbl:'Tutors',val:tutor,key:'tutors'
+    },
+    // OPPRESSION — how painful is this deck to play against?
+    salt:{
+      bPts:saltSum<=6?2:saltSum<=18?5:saltSum<=36?9:saltSum<=58?12:14,
+      max:14,lbl:'Est. Salt',val:saltSum.toFixed(1),key:'salt'
+    },
+    // SPEED — lower CMC = faster development = more wins
+    avgCmc:{
+      bPts:avgCmc>=4?1:avgCmc>=3.3?4:avgCmc>=2.8?8:avgCmc>=2.3?11:14,
+      max:14,lbl:'Avg CMC',val:avgCmc.toFixed(2),key:'avgCmc'
+    },
+    // INTERACTION — can it answer threats and protect its plan?
+    interaction:{
+      bPts:interaction===0?0:interaction<=3?2:interaction<=7?5:interaction<=12?7:9,
+      max:9,lbl:'Interaction',val:interaction,key:'interaction'
+    },
+    // CARD ADVANTAGE — needed but not sufficient for winning
+    draw:{
+      bPts:draw===0?0:draw<=3?1:draw<=7?3:draw<=11?5:draw<=15?7:9,
+      max:9,lbl:'Card Draw',val:draw,key:'draw'
+    },
+    // RAMP — table stakes, massively downweighted vs old system
+    ramp:{
+      bPts:ramp===0?0:ramp<=4?1:ramp<=8?3:ramp<=13?5:7,
+      max:7,lbl:'Ramp',val:ramp,key:'ramp'
+    },
+    // CARD QUALITY — price as proxy for card power level
+    deckPrice:{
+      bPts:avgPrice<0.4?1:avgPrice<1?2:avgPrice<3?4:avgPrice<7?5:avgPrice<15?6:7,
+      max:7,lbl:'Deck Value',val:estDeckVal>0?`~$${estDeckVal.toLocaleString()}`:'—',key:'deckPrice'
+    },
   };
+
+  // Apply AI weights
   const sub={};
   for(const[key,s]of Object.entries(baseSub)){
-    const w=aiWeights[key];
+    const w=aiWeights[key]||1.0;
     sub[key]={...s,pts:s.bPts*w,wMax:s.max*w,weight:w,weightReason:aiWeightReasons[key]||null};
   }
 
-  const tot=Object.values(sub).reduce((s,v)=>s+v.pts,0);
-  const mx=Object.values(sub).reduce((s,v)=>s+v.wMax,0);
-  const staticRaw=mx>0?tot/mx:0;
+  // ── WIN CONDITION COHERENCE BONUS ─────────────────────────────────────────
+  // Having BOTH game changers AND tutors is multiplicatively powerful:
+  // tutors find game changers → deck executes plan reliably every game.
+  // This bonus captures that synergy and is the biggest differentiator.
+  const coherencePts=
+    (gcCnt>=3&&tutor>=5)?10:  // cEDH: fully tuned, finds win cons every game
+    (gcCnt>=2&&tutor>=4)?7:   // High power: reliable execution
+    (gcCnt>=2&&tutor>=2)?4:   // Upgraded: has a plan and can find it
+    (gcCnt>=1&&tutor>=2)?2:   // Focused: some consistency
+    0;
+
+  const rawTot=Object.values(sub).reduce((s,v)=>s+v.pts,0) + coherencePts;
+  const rawMax=Object.values(sub).reduce((s,v)=>s+v.wMax,0); // coherence is bonus above max
+  const staticRaw=rawMax>0?rawTot/rawMax:0;
+
   const aiKpiRaw=aiKpis.length>0?aiKpis.reduce((s,k)=>s+k.score,0)/(aiKpis.length*10):null;
   const rawScore=aiKpiRaw!==null?staticRaw*0.55+aiKpiRaw*0.45:staticRaw;
   const score=parseFloat(Math.max(1,Math.min(10,(1+rawScore*9))).toFixed(1));
@@ -1050,12 +1171,13 @@ function calcScores(cards,sfMap){
     draw:drawList.map(c=>({name:c.name,manaCost:c.manaCost})),
     tutors:tutorList.map(c=>({name:c.name,manaCost:c.manaCost})),
     recursion:recursionList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    interaction:interactionList.map(c=>({name:c.name,manaCost:c.manaCost})),
   };
   themes.forEach(t=>{cardLists[t.key]=t.cards;});
 
-  return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,recursion,bkt,
+  return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,recursion,interaction,bkt,
     landCount,totalCards,curve,avgPrice,estDeckVal,cardLists,themes,
-    aiKpis,aiAdjusted};
+    aiKpis,aiAdjusted,coherencePts};
 }
 
 // ── RENDER ─────────────────────────────────────────────────────────────────────
@@ -1136,11 +1258,13 @@ function render(deck,sc,sfMap){
   // Detail stat grid
   const dg=document.getElementById('r-dg');dg.innerHTML='';
   [{v:sc.gcCnt,n:'Game Changers'},{v:sc.saltSum.toFixed(0),n:'Est. Salt'},
-   {v:sc.ramp,n:'Ramp Pieces'},{v:sc.draw,n:'Draw Spells'},
-   {v:sc.recursion,n:'Recursion'},{v:sc.tutor,n:'Tutors'},
+   {v:sc.tutor,n:'Tutors'},{v:sc.interaction,n:'Interaction'},
+   {v:sc.draw,n:'Card Draw'},{v:sc.ramp,n:'Ramp'},
+   {v:sc.recursion,n:'Recursion'},
    {v:sc.estDeckVal>0?`$${sc.estDeckVal.toLocaleString()}`:'—',n:'Est. Value'},
+   ...(sc.coherencePts>0?[{v:`+${sc.coherencePts}`,n:'Coherence Bonus',tip:'GC+Tutors synergy'}]:[]),
   ].forEach(d=>dg.insertAdjacentHTML('beforeend',
-    `<div class="dc"><div class="dv">${d.v}</div><div class="dn">${d.n}</div></div>`));
+    `<div class="dc" title="${d.tip||''}"><div class="dv">${d.v}</div><div class="dn">${d.n}</div></div>`));
   // AI KPIs in grid (only when available)
   sc.aiKpis.forEach(k=>{
     const pct=Math.round(k.score/10*100);
@@ -1187,7 +1311,7 @@ function render(deck,sc,sfMap){
       <span class="bn" onclick="openPopup('recursion','Recursion')" style="opacity:.75">Recursion <span style="font-size:10px;font-weight:400;opacity:.6">(info only)</span></span>
       <span class="bp" style="opacity:.75">${sc.recursion}<span class="bval"> pieces</span></span>
     </div>
-    <div class="bt"><div class="bf" style="width:${Math.min(100,sc.recursion*8)}%" ></div></div>`;
+    <div class="bt"><div class="bf" style="width:${Math.min(100,sc.recursion*8)}%"></div></div>`;
   document.getElementById('r-bars').appendChild(recRow);
 
   // Mana curve
@@ -1292,6 +1416,12 @@ function renderAiPanel(aiData){
 
   result.style.display='block';
 
+  // Show which provider was used
+  if(aiData._provider){
+    const note=document.getElementById('ai-provider-note');
+    if(note) note.textContent=`Analyzed by ${aiData._provider} · Score weights adjusted per strategy`;
+  }
+
   // ── STRATEGY AUDIT ──────────────────────────────────────────────────────────
   const auditPnl=document.getElementById('r-audit-pnl');
   const auditBody=document.getElementById('r-audit-body');
@@ -1318,6 +1448,122 @@ function renderAiPanel(aiData){
     auditBody.innerHTML='';
     auditBody.appendChild(grid);
   }
+}
+
+// ── HISTORY / FAVOURITES ──────────────────────────────────────────────────────
+const HIST_KEY='poweredh_v1';
+const HIST_MAX=10;
+let G_currentUrl='';
+let G_histTab='all';
+
+function loadHistory(){
+  try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}
+  catch{return [];}
+}
+function saveHistory(arr){
+  try{localStorage.setItem(HIST_KEY,JSON.stringify(arr));}
+  catch{}
+}
+
+function addToHistory(entry){
+  // entry: {url,deckName,cmdName,cmdImg,colors,score,timestamp,favourite}
+  let arr=loadHistory();
+  // Remove duplicate URL
+  arr=arr.filter(e=>e.url!==entry.url);
+  // Preserve favourite state if previously saved
+  const existing=arr.find(e=>e.url===entry.url);
+  entry.favourite=existing?.favourite||false;
+  arr.unshift(entry);
+  // Keep only HIST_MAX, but never drop favourites
+  const favs=arr.filter(e=>e.favourite);
+  const nonFavs=arr.filter(e=>!e.favourite).slice(0,HIST_MAX);
+  arr=[...favs,...nonFavs].slice(0,HIST_MAX+favs.length);
+  saveHistory(arr);
+  renderHistory();
+}
+
+function toggleFav(url){
+  let arr=loadHistory();
+  arr=arr.map(e=>e.url===url?{...e,favourite:!e.favourite}:e);
+  saveHistory(arr);
+  renderHistory();
+  // Update star in header if this is the current deck
+  if(url===G_currentUrl) updateFavBtn(arr.find(e=>e.url===url)?.favourite||false);
+}
+function toggleCurrentFav(){
+  if(G_currentUrl) toggleFav(G_currentUrl);
+}
+function updateFavBtn(isFav){
+  const btn=document.getElementById('r-fav-btn');
+  if(btn){btn.textContent=isFav?'⭐':'☆';btn.title=isFav?'Remove from favourites':'Add to favourites';}
+}
+
+function clearHistory(){
+  if(!confirm('Clear all history? Favourites will also be removed.'))return;
+  localStorage.removeItem(HIST_KEY);
+  renderHistory();
+}
+
+function switchTab(tab){
+  G_histTab=tab;
+  document.getElementById('tab-all').classList.toggle('active',tab==='all');
+  document.getElementById('tab-fav').classList.toggle('active',tab==='fav');
+  renderHistory();
+}
+
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return 'just now';
+  if(s<3600)return `${Math.floor(s/60)}m ago`;
+  if(s<86400)return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function renderHistory(){
+  let arr=loadHistory();
+  const section=document.getElementById('history-section');
+  const list=document.getElementById('hist-list');
+  if(!arr.length){section.style.display='none';return;}
+  section.style.display='block';
+
+  const filtered=G_histTab==='fav'?arr.filter(e=>e.favourite):arr;
+
+  if(!filtered.length){
+    list.innerHTML=`<div class="hist-empty">No favourites yet — click ☆ on any deck result to save it.</div>`;
+    return;
+  }
+
+  list.innerHTML='';
+  filtered.forEach(entry=>{
+    const row=document.createElement('div');
+    row.className='hist-item';
+
+    const img=entry.cmdImg
+      ?`<img class="hist-img" src="${entry.cmdImg}" alt="" onerror="this.outerHTML='<div class=hist-img-ph>🧙</div>'">`
+      :`<div class="hist-img-ph">🧙</div>`;
+
+    const scoreColor=entry.score>=7?'#d07030':entry.score>=5?'#c8a84c':entry.score>=3?'#4880c8':'#5a9a5a';
+
+    row.innerHTML=`
+      ${img}
+      <div class="hist-info">
+        <div class="hist-name">${entry.deckName||'Unnamed'}</div>
+        <div class="hist-cmd">${entry.cmdName||''}</div>
+        <div class="hist-time">${timeAgo(entry.timestamp)}</div>
+      </div>
+      <div class="hist-score" style="color:${scoreColor}">${entry.score||'?'}</div>
+      <button class="hist-fav${entry.favourite?' active':''}"
+        onclick="event.stopPropagation();toggleFav('${entry.url.replace(/'/g,"\\'")}')"
+        title="${entry.favourite?'Remove from favourites':'Add to favourites'}">
+        ${entry.favourite?'⭐':'☆'}
+      </button>`;
+
+    row.addEventListener('click',()=>{
+      document.getElementById('url-in').value=entry.url;
+      go();
+    });
+    list.appendChild(row);
+  });
 }
 
 // ── MAIN ───────────────────────────────────────────────────────────────────────
@@ -1394,11 +1640,29 @@ async function go(){
     ovStep(4);
     const sc=calcScores(deck.cards,sfMap);
 
+    // Save to history (after we have score and commander image)
+    const cmdSfForHistory=sfMap[deck.cmd?.name]||{};
+    G_currentUrl=rawUrl;
+    const histEntry={
+      url:rawUrl,
+      deckName:deck.deckName,
+      cmdName:deck.cmd?.name||'',
+      cmdImg:cmdSfForHistory.imgLg||cmdSfForHistory.img||'',
+      colors:deck.colors,
+      score:sc.score,
+      timestamp:Date.now(),
+      favourite:loadHistory().find(e=>e.url===rawUrl)?.favourite||false,
+    };
+    addToHistory(histEntry);
+
     ovHide();
     document.getElementById('is').style.display='none';
     document.getElementById('rs').style.display='block';
     render(deck,sc,sfMap);
     renderAiPanel(rawAi);
+
+    // Update the fav button state
+    updateFavBtn(histEntry.favourite);
 
   }catch(e){
     ovHide();
@@ -1420,6 +1684,7 @@ function goBack(){
   G_sfMap={};G_cardLists={};
   G_cmdFront='';G_cmdBack='';G_cmdFlipped=false;
   G_deckData=null;G_scoreData=null;
+  G_currentUrl='';
   window._aiData=null;
   document.getElementById('r-flip-btn').style.display='none';
   document.getElementById('r-ai-pnl').style.display='none';
@@ -1436,6 +1701,7 @@ function goBack(){
 
 document.getElementById('url-in').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 loadSplash();
+renderHistory();
 
 // Auto-load deck from URL parameter on page open (enables shareable links)
 (function(){

@@ -9,96 +9,69 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg1:#0a1808;--bg2:#101e10;
-  --a:#58c058;--a2:#309030;
-  --t:#e0f5e0;--m:#60a060;
-  --pnl:rgba(13,30,14,.88);--bdr:rgba(88,192,88,.2);
+  --bg1:#0a1808;--bg2:#101e10;--a:#58c058;--a2:#309030;
+  --t:#e0f5e0;--m:#60a060;--pnl:rgba(13,30,14,.88);--bdr:rgba(88,192,88,.2);
 }
 html,body{min-height:100vh}
-body{
-  font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
-  background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);
-  transition:background 1s ease;
-}
+body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
+  background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);transition:background 1s ease;}
+
+/* ── BACKGROUND ── */
 #bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.bc{
-  position:absolute;border-radius:8px;pointer-events:none;display:block;
-  box-shadow:0 8px 30px rgba(0,0,0,.65);opacity:0;transition:opacity 1.2s ease;
-}
-#veil{
-  position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,var(--bg1) 72%);
-  transition:background 1s;
-}
+.bc{position:absolute;border-radius:8px;pointer-events:none;display:block;
+  box-shadow:0 8px 30px rgba(0,0,0,.65);opacity:0;transition:opacity 1.4s ease;}
+#veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,var(--bg1) 70%);
+  transition:background 1s;}
+
+/* ── APP ── */
 #app{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 20px}
 
-/* INPUT */
+/* ── INPUT ── */
 #is{text-align:center;max-width:600px;width:100%}
-.logo{
-  font-family:'Cinzel',serif;font-size:clamp(30px,7vw,52px);font-weight:900;
+.logo{font-family:'Cinzel',serif;font-size:clamp(30px,7vw,52px);font-weight:900;
   letter-spacing:3px;line-height:1.1;margin-bottom:8px;color:var(--a);
-  text-shadow:0 0 60px color-mix(in srgb,var(--a) 55%,transparent),0 2px 12px rgba(0,0,0,.8);
-}
+  text-shadow:0 0 60px color-mix(in srgb,var(--a) 55%,transparent),0 2px 12px rgba(0,0,0,.8);}
 .logo-sub{font-size:clamp(10px,2vw,13px);letter-spacing:5px;opacity:.55;display:block;margin-top:5px}
 .tagline{color:var(--m);font-size:15px;margin:14px 0 32px;line-height:1.7;opacity:.9}
-.url-wrap{
-  display:flex;border-radius:16px;overflow:hidden;
-  box-shadow:0 8px 40px rgba(0,0,0,.55),0 0 0 1px var(--bdr);
-}
-.url-in{
-  flex:1;padding:20px 22px;font-family:'Nunito Sans',sans-serif;font-size:15px;
-  border:none;background:rgba(255,255,255,.07);color:var(--t);outline:none;min-width:0;
-}
+.url-wrap{display:flex;border-radius:16px;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.55),0 0 0 1px var(--bdr);}
+.url-in{flex:1;padding:20px 22px;font-family:'Nunito Sans',sans-serif;font-size:15px;
+  border:none;background:rgba(255,255,255,.07);color:var(--t);outline:none;min-width:0;}
 .url-in::placeholder{color:var(--m)}
-.url-btn{
-  padding:20px 28px;background:var(--a);color:#0a1408;border:none;
+.url-btn{padding:20px 28px;background:var(--a);color:#0a1408;border:none;
   font-family:'Cinzel',serif;font-size:12px;font-weight:900;letter-spacing:2px;
-  cursor:pointer;white-space:nowrap;transition:background .2s;flex-shrink:0;
-}
+  cursor:pointer;white-space:nowrap;transition:background .2s;flex-shrink:0;}
 .url-btn:hover{background:var(--a2);color:#fff}
 .url-btn:disabled{opacity:.4;cursor:not-allowed}
-.err{
-  margin-top:16px;padding:14px 20px;background:rgba(200,60,60,.18);
+.err{margin-top:16px;padding:14px 20px;background:rgba(200,60,60,.18);
   border:1px solid rgba(200,60,60,.4);border-radius:10px;font-size:13px;
-  color:#ffaaaa;display:none;line-height:1.7;text-align:left;
-}
+  color:#ffaaaa;display:none;line-height:1.7;text-align:left;}
 @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
 #ld{margin-top:18px;font-size:14px;color:var(--a);display:none;animation:pulse 1.4s infinite;letter-spacing:.5px}
 .hint{margin-top:20px;font-size:12px;color:var(--m);opacity:.5;line-height:1.8}
 
-/* RESULTS */
+/* ── RESULTS ── */
 #rs{width:100%;max-width:1140px;display:none}
 @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 .rs-in{animation:fadeUp .55s ease}
-.back{
-  background:none;border:1px solid var(--bdr);color:var(--m);
-  padding:9px 18px;border-radius:9px;font-size:13px;
-  cursor:pointer;transition:all .2s;margin-bottom:18px;display:inline-flex;align-items:center;gap:6px;
-}
+.back{background:none;border:1px solid var(--bdr);color:var(--m);padding:9px 18px;
+  border-radius:9px;font-size:13px;cursor:pointer;transition:all .2s;margin-bottom:18px;
+  display:inline-flex;align-items:center;gap:6px;}
 .back:hover{border-color:var(--a);color:var(--a)}
-.pnl{
-  background:var(--pnl);border:1px solid var(--bdr);border-radius:20px;
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  box-shadow:0 8px 40px rgba(0,0,0,.45);
-}
+.pnl{background:var(--pnl);border:1px solid var(--bdr);border-radius:20px;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 8px 40px rgba(0,0,0,.45);}
 
-/* header with card strip */
-.hdr{
-  padding:22px 28px;display:flex;align-items:center;
-  justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px;
-  position:relative;overflow:hidden;
-}
-.hdr-strip{
-  position:absolute;inset:0;display:flex;align-items:center;
-  pointer-events:none;overflow:hidden;
-  mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.6) 12%,rgba(0,0,0,.6) 88%,transparent 100%);
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.6) 12%,rgba(0,0,0,.6) 88%,transparent 100%);
-}
-.hc{
-  flex-shrink:0;border-radius:5px;
-  box-shadow:0 4px 16px rgba(0,0,0,.5);
-  opacity:.22;
-}
+/* ── HEADER ── */
+.hdr{padding:22px 28px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:14px;margin-bottom:18px;position:relative;overflow:hidden;}
+/* card strip inside header */
+.hdr-strip{position:absolute;inset:0;display:flex;align-items:center;pointer-events:none;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,black 10%,black 90%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,black 10%,black 90%,transparent 100%);}
+.hc{flex-shrink:0;border-radius:6px;display:block;opacity:.22;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);}
 .hdr-text{position:relative;z-index:1}
 .hdr-title{font-family:'Cinzel',serif;font-size:clamp(15px,2.4vw,23px);font-weight:900;letter-spacing:.5px}
 .hdr-sub{font-size:14px;color:var(--a);margin-top:3px;font-weight:600}
@@ -109,54 +82,47 @@ body{
 .pB{background:#1a1230;color:#c0a8e0}.pR{background:#c83020;color:#ffe0d0}
 .pG{background:#1a6a20;color:#c8f5c8}.pC{background:#888;color:#f0f0f0}
 
+/* ── MAIN GRID ── */
 .mg{display:grid;grid-template-columns:270px 1fr;gap:18px;margin-bottom:18px}
 @media(max-width:700px){.mg{grid-template-columns:1fr}}
 
+/* left col */
 .lc{padding:22px;display:flex;flex-direction:column;align-items:center;gap:12px}
-.cmd-img{
-  width:196px;border-radius:14px;display:block;
+.cmd-img{width:196px;border-radius:14px;display:none;
   box-shadow:0 14px 50px rgba(0,0,0,.75),0 0 0 2px var(--bdr);
-  transition:transform .3s;cursor:pointer;
-}
+  transition:transform .3s;cursor:pointer;}
 .cmd-img:hover{transform:scale(1.04) rotate(-1.5deg)}
-.statrow{
-  width:100%;display:flex;justify-content:space-between;align-items:center;
+.cmd-placeholder{width:196px;height:274px;border-radius:14px;
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;color:var(--m);opacity:.4}
+.statrow{width:100%;display:flex;justify-content:space-between;align-items:center;
   padding:11px 16px;background:rgba(255,255,255,.05);border-radius:11px;
-  font-size:14px;border:1px solid rgba(255,255,255,.05);
-}
+  font-size:14px;border:1px solid rgba(255,255,255,.05);}
 .sl{color:var(--m)}.sv{font-weight:700;font-size:16px;color:var(--a)}
 
+/* right col */
 .rc{padding:26px 28px}
 .sc-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px}
 .sc-lbl{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--m);margin-bottom:5px}
-.big-sc{
-  font-family:'Cinzel',serif;font-size:clamp(72px,12vw,108px);font-weight:900;line-height:1;
-  color:var(--a);text-shadow:0 0 40px color-mix(in srgb,var(--a) 55%,transparent);
-  transition:color .6s,text-shadow .6s;
-}
+.big-sc{font-family:'Cinzel',serif;font-size:clamp(72px,12vw,108px);font-weight:900;line-height:1;
+  color:var(--a);text-shadow:0 0 40px color-mix(in srgb,var(--a) 55%,transparent);transition:color .6s,text-shadow .6s;}
 .big-sc span{font-size:26px;color:var(--m);font-family:'Nunito Sans',sans-serif;font-weight:400}
-.tier-badge{
-  padding:12px 22px;border-radius:40px;font-family:'Cinzel',serif;font-size:17px;font-weight:700;
-  border:2px solid;display:inline-flex;align-items:center;gap:10px;white-space:nowrap;transition:all .6s;
-}
+.tier-badge{padding:12px 22px;border-radius:40px;font-family:'Cinzel',serif;font-size:17px;
+  font-weight:700;border:2px solid;display:inline-flex;align-items:center;gap:10px;white-space:nowrap;transition:all .6s;}
 .tier-desc{font-size:13px;color:var(--m);margin-top:8px;font-style:italic;opacity:.8}
-
 .band-wrap{margin-bottom:20px}
 .band{height:12px;border-radius:6px;position:relative;overflow:visible;
   background:linear-gradient(90deg,#4a9a4a 0%,#c9a84c 35%,#c07030 60%,#c84040 100%)}
-.needle{
-  position:absolute;top:-5px;width:22px;height:22px;background:#fff;border-radius:50%;
+.needle{position:absolute;top:-5px;width:22px;height:22px;background:#fff;border-radius:50%;
   transform:translateX(-50%);box-shadow:0 2px 10px rgba(0,0,0,.5);
-  transition:left 1.2s cubic-bezier(.4,0,.2,1),border-color .6s;border:3px solid var(--a);left:0%;
-}
+  transition:left 1.2s cubic-bezier(.4,0,.2,1),border-color .6s;border:3px solid var(--a);left:0%;}
 .tier-lbs{display:flex;justify-content:space-between;margin-top:5px}
 .tlb{font-size:9px;color:var(--m);letter-spacing:.3px}
-
 .dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin:18px 0}
 .dc{padding:14px 10px;background:rgba(255,255,255,.04);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
 .dv{font-size:24px;font-weight:900;color:var(--a);font-family:'Cinzel',serif}
 .dn{font-size:10px;color:var(--m);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;line-height:1.3}
-
 .bars{display:flex;flex-direction:column;gap:13px}
 .brow .bh{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}
 .bn{font-weight:700}.bp{color:var(--a);font-weight:700}
@@ -164,7 +130,6 @@ body{
 .bt{height:9px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden}
 .bf{height:100%;border-radius:5px;transition:width 1.2s cubic-bezier(.4,0,.2,1);
   background:linear-gradient(90deg,var(--a2),var(--a))}
-
 .curve-pnl{padding:22px 26px;margin-bottom:18px}
 .sec-t{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--m);text-transform:uppercase;margin-bottom:16px}
 .curve-outer{height:100px;display:flex;align-items:flex-end;gap:6px}
@@ -172,7 +137,6 @@ body{
 .cnum{font-size:12px;color:var(--m);font-weight:700;min-height:18px;display:flex;align-items:center;justify-content:center}
 .cbar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(to top,var(--a2),var(--a));min-height:0;transition:height .9s cubic-bezier(.4,0,.2,1)}
 .clbl{font-size:12px;color:var(--m);margin-top:5px;font-weight:600}
-
 .fnote{text-align:center;font-size:11px;color:rgba(255,255,255,.2);padding-bottom:20px;margin-top:6px;line-height:1.9}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 </style>
@@ -193,7 +157,7 @@ body{
   </div>
   <div id="err-msg" class="err"></div>
   <div id="ld">Summoning your deck…</div>
-  <div class="hint">Decks must be public · Prices use cheapest non-foil printing · Archidekt recommended</div>
+  <div class="hint">Decks must be public · Prices from Scryfall non-foil USD · Archidekt recommended</div>
 </div>
 
 <div id="rs">
@@ -209,9 +173,10 @@ body{
     </div>
     <div class="mg">
       <div class="pnl lc">
-        <img id="r-img" class="cmd-img" src="" alt="" onerror="this.style.display='none'" style="display:none">
+        <img id="r-img" class="cmd-img" src="" alt="" onerror="this.style.display='none'">
+        <div id="r-img-ph" class="cmd-placeholder">🧙</div>
         <div style="width:100%;display:flex;flex-direction:column;gap:8px">
-          <div class="statrow"><span class="sl">Cards</span><span class="sv" id="r-cnt">—</span></div>
+          <div class="statrow"><span class="sl">Total Cards</span><span class="sv" id="r-cnt">—</span></div>
           <div class="statrow"><span class="sl">Avg CMC</span><span class="sv" id="r-cmc">—</span></div>
           <div class="statrow"><span class="sl">Lands</span><span class="sv" id="r-lands">—</span></div>
           <div class="statrow"><span class="sl">Est. Value</span><span class="sv" id="r-val">—</span></div>
@@ -230,10 +195,8 @@ body{
         <div class="band-wrap">
           <div class="band"><div class="needle" id="r-needle"></div></div>
           <div class="tier-lbs">
-            <span class="tlb">1 · Precon</span>
-            <span class="tlb">3 · Casual</span>
-            <span class="tlb">5 · Upgraded</span>
-            <span class="tlb">7 · High Power</span>
+            <span class="tlb">1 · Precon</span><span class="tlb">3 · Casual</span>
+            <span class="tlb">5 · Upgraded</span><span class="tlb">7 · High Power</span>
             <span class="tlb">10 · cEDH</span>
           </div>
         </div>
@@ -246,29 +209,33 @@ body{
       <div class="curve-outer" id="r-curve"></div>
     </div>
     <div class="fnote">
-      Score: Game Changers (18) · Salt Estimate (17) · Deck Value (15) · Avg CMC (15) · Ramp (12) · Card Draw (12) · Tutors (11) → scaled to 1–10<br>
-      Prices from deck data (non-foil). Min of deck price vs Scryfall to avoid collector edition inflation.
+      Score: Game Changers (18) · Salt Estimate (17) · Deck Value (15) · Avg CMC (15) · Ramp (12) · Card Draw (12) · Tutors (11) → scaled 1–10<br>
+      Prices: Scryfall non-foil USD per card (cheapest standard printing). Card count includes all copies of basics.
     </div>
   </div>
 </div>
 
-</div>
+</div><!-- #app -->
 <script>
-const GC=new Set(["Ad Nauseam","Armageddon","Bribery","Capture of Jingzhou","Chain of Smog",
-"Chrome Mox","Consecrated Sphinx","Contamination","Crop Rotation","Cyclonic Rift",
-"Deflecting Swat","Demonic Consultation","Demonic Tutor","Dockside Extortionist",
-"Drannith Magistrate","Elesh Norn, Grand Cenobite","Expropriate","Fierce Guardianship",
-"Flash","Force of Will","Glacial Chasm","Green Sun's Zenith","Grim Monolith",
-"Imperial Seal","Intuition","Jeweled Lotus","Jin-Gitaxias, Core Augur",
-"Jin-Gitaxias, Progress Tyrant","Land Equilibrium","Mana Crypt","Mana Drain",
-"Mana Vault","Mind Twist","Mox Diamond","Mystical Tutor","Natural Order","Necropotence",
-"Opposition Agent","Praetor's Grasp","Rhystic Study","Seedborn Muse",
-"Sensei's Divining Top","Sheoldred, the Apocalypse","Smothering Tithe","Stasis",
-"Tainted Pact","Thassa's Oracle","Time Stretch","Time Warp","Treachery",
+'use strict';
+
+// ── GAME CHANGERS (WotC official) ──────────────────────────────────────────
+const GC=new Set(["Ad Nauseam","Armageddon","Bribery","Capture of Jingzhou",
+"Chain of Smog","Chrome Mox","Consecrated Sphinx","Contamination","Crop Rotation",
+"Cyclonic Rift","Deflecting Swat","Demonic Consultation","Demonic Tutor",
+"Dockside Extortionist","Drannith Magistrate","Elesh Norn, Grand Cenobite",
+"Expropriate","Fierce Guardianship","Flash","Force of Will","Glacial Chasm",
+"Green Sun's Zenith","Grim Monolith","Imperial Seal","Intuition","Jeweled Lotus",
+"Jin-Gitaxias, Core Augur","Jin-Gitaxias, Progress Tyrant","Land Equilibrium",
+"Mana Crypt","Mana Drain","Mana Vault","Mind Twist","Mox Diamond","Mystical Tutor",
+"Natural Order","Necropotence","Opposition Agent","Praetor's Grasp","Rhystic Study",
+"Seedborn Muse","Sensei's Divining Top","Sheoldred, the Apocalypse","Smothering Tithe",
+"Stasis","Tainted Pact","Thassa's Oracle","Time Stretch","Time Warp","Treachery",
 "Underworld Breach","Vampiric Tutor","Vorinclex, Voice of Hunger","Winter Orb",
 "Worldly Tutor","Zur the Enchanter","Black Market Connections","Iona, Shield of Emeria",
 "Karn Liberated","Vorinclex, Monstrous Raider"]);
 
+// ── SALT SCORES (EDHREC) ───────────────────────────────────────────────────
 const SALT={"Stasis":3.06,"Armageddon":2.98,"Winter Orb":2.95,"Cyclonic Rift":2.85,
 "Rhystic Study":2.82,"Smothering Tithe":2.74,"Mana Crypt":2.70,"Tergrid, God of Fright":2.52,
 "Expropriate":2.50,"Vorinclex, Voice of Hunger":2.48,"Thassa's Oracle":2.45,
@@ -282,15 +249,16 @@ const SALT={"Stasis":3.06,"Armageddon":2.98,"Winter Orb":2.95,"Cyclonic Rift":2.
 "Sheoldred, the Apocalypse":1.88,"Jin-Gitaxias, Progress Tyrant":1.80,
 "Grand Arbiter Augustin IV":1.80,"Time Stretch":1.80,"Bribery":1.78,
 "Imperial Seal":1.75,"Capture of Jingzhou":1.75,"Praetor's Grasp":1.70,
-"Zur the Enchanter":1.70,"Flash":1.72,"Iona, Shield of Emeria":2.30,
-"Mana Vault":1.65,"Grim Monolith":1.58,"Jeweled Lotus":1.60,"Deflecting Swat":1.60,
-"Mox Diamond":1.55,"Force of Will":1.55,"Chrome Mox":1.45,"Sensei's Divining Top":1.45,
+"Zur the Enchanter":1.70,"Flash":1.72,"Iona, Shield of Emeria":2.30,"Mana Vault":1.65,
+"Grim Monolith":1.58,"Jeweled Lotus":1.60,"Deflecting Swat":1.60,"Mox Diamond":1.55,
+"Force of Will":1.55,"Chrome Mox":1.45,"Sensei's Divining Top":1.45,
 "Underworld Breach":1.68,"Tainted Pact":1.62,"Demonic Consultation":1.58,
 "Mystical Tutor":1.50,"Intuition":1.50,"Natural Order":1.40,"Green Sun's Zenith":1.35,
 "Worldly Tutor":1.30,"Crop Rotation":1.10,"Sol Ring":0.5,
 "Black Market Connections":1.50,"Karn Liberated":1.65,
 "Decree of Annihilation":2.80,"Ravages of War":2.75,"Obliterate":2.65};
 
+// ── COLOR PALETTES ────────────────────────────────────────────────────────
 const PAL={
 '':  {n:'Colorless',bg1:'#111118',bg2:'#181824',a:'#9898c8',a2:'#5858a0',t:'#e0e0f0',m:'#7878a0',p:'rgba(20,20,36,.88)',b:'rgba(150,150,200,.22)'},
 'W': {n:'White',    bg1:'#2e2010',bg2:'#3e2c18',a:'#e8c84a',a2:'#c8a020',t:'#fff8e8',m:'#b09860',p:'rgba(54,40,17,.90)',b:'rgba(232,200,74,.28)'},
@@ -333,9 +301,10 @@ function applyPal(p){
   });
   document.body.style.background=`linear-gradient(135deg,${p.bg1} 0%,${p.bg2} 100%)`;
   document.getElementById('veil').style.background=
-    `radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,${p.bg1} 72%)`;
+    `radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,${p.bg1} 70%)`;
 }
 
+// ── TIERS ─────────────────────────────────────────────────────────────────
 const TIERS=[
   {min:1,  max:2.4, label:'Precon',       emoji:'🌱',color:'#5a9a5a',desc:'Straight from the box. No real threat at the table.'},
   {min:2.5,max:4.4, label:'Casual',       emoji:'🐾',color:'#4880c8',desc:'Fun kitchen table deck with a clear plan.'},
@@ -345,57 +314,102 @@ const TIERS=[
 ];
 const getTier=s=>TIERS.find(t=>s>=t.min&&s<=t.max)||TIERS[0];
 
-// Scatter cards across a container element
-function scatterCards(imgs,container){
-  container.innerHTML='';
-  if(!imgs.length)return;
+// ── BACKGROUND SCATTER ───────────────────────────────────────────────────
+function scatterCards(imgs){
+  const bg=document.getElementById('bg');
+  bg.innerHTML='';
+  if(!imgs||!imgs.length)return;
   const W=window.innerWidth,H=window.innerHeight;
-  [...imgs].sort(()=>Math.random()-.5).slice(0,30).forEach(src=>{
+  const pool=[...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,32);
+  pool.forEach(src=>{
     const el=document.createElement('img');
-    el.className='bc';el.src=src;el.alt='';el.loading='lazy';
-    const w=78+Math.random()*92;
-    el.style.cssText=`left:${Math.random()*(W-w)}px;top:${Math.random()*(H-60)}px;width:${w}px;transform:rotate(${(Math.random()-.5)*65}deg);`;
-    const targetOp=(0.18+Math.random()*0.25).toFixed(2);
+    el.className='bc';
+    el.src=src;el.alt='';el.loading='lazy';
+    const w=78+Math.random()*95;
+    const rot=(Math.random()-.5)*65;
+    const op=(0.16+Math.random()*0.24).toFixed(2);
+    el.style.left=`${Math.random()*(W-w)}px`;
+    el.style.top=`${Math.random()*(H-40)}px`;
+    el.style.width=`${w}px`;
+    el.style.transform=`rotate(${rot}deg)`;
     el.onerror=()=>el.remove();
-    container.appendChild(el);
-    setTimeout(()=>el.style.opacity=targetOp,80+Math.random()*500);
+    document.getElementById('bg').appendChild(el);
+    // Staggered fade-in: must happen after append
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.opacity=op;}));
   });
 }
 
-// Fill header strip
-function fillHeaderStrip(imgs){
+// ── HEADER STRIP ──────────────────────────────────────────────────────────
+function fillHeader(imgs){
   const strip=document.getElementById('hdr-strip');
   strip.innerHTML='';
-  [...imgs].sort(()=>Math.random()-.5).slice(0,12).forEach((src,i)=>{
+  if(!imgs||!imgs.length)return;
+  [...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,14).forEach((src,i)=>{
     const img=document.createElement('img');
     img.className='hc';img.src=src;img.alt='';
-    const h=100+Math.random()*50;
-    const rot=(Math.random()-.5)*16;
-    const mt=(Math.random()-.5)*30;
-    img.style.cssText=`height:${h}px;border-radius:6px;transform:rotate(${rot}deg) translateY(${mt}px);margin-left:${i>0?-(8+Math.random()*14)+'px':'4px'};`;
+    const h=100+Math.random()*60;
+    const rot=(Math.random()-.5)*18;
+    const ty=(Math.random()-.5)*35;
+    img.style.height=`${h}px`;
+    img.style.transform=`rotate(${rot}deg) translateY(${ty}px)`;
+    img.style.marginLeft=i===0?'8px':`-${8+Math.random()*18}px`;
     img.onerror=()=>img.remove();
     strip.appendChild(img);
   });
 }
 
-// Load splash background with iconic EDH cards
-async function loadSplash(){
-  try{
-    const names=['Sol Ring','Command Tower','Arcane Signet','Lightning Bolt',
-      'Counterspell','Demonic Tutor','Swords to Plowshares','Cyclonic Rift',
-      'Rhystic Study','Smothering Tithe','Mana Crypt','Fierce Guardianship',
-      'Brainstorm','Birds of Paradise','Dark Ritual','Path to Exile',
-      'Cultivate',"Kodama's Reach",'Vanquisher\'s Banner','Sol Ring'];
-    const r=await fetch('https://api.scryfall.com/cards/collection',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({identifiers:[...new Set(names)].map(n=>({name:n}))})
-    });
-    const d=await r.json();
-    const imgs=(d.data||[]).map(c=>c.image_uris?.normal||c.card_faces?.[0]?.image_uris?.normal).filter(Boolean);
-    scatterCards(imgs,document.getElementById('bg'));
-  }catch(e){console.warn('Splash cards:',e);}
+// ── SCRYFALL BATCH ────────────────────────────────────────────────────────
+// Returns map: { canonicalName -> { img, price } }
+// Uses ONLY card names — never IDs (Archidekt UIDs are not Scryfall card IDs)
+async function scryfallBatch(names){
+  const map={};
+  if(!names.length)return map;
+  // Deduplicate
+  const unique=[...new Set(names)];
+  // Batch into groups of 75 (Scryfall limit)
+  for(let i=0;i<unique.length;i+=75){
+    const batch=unique.slice(i,i+75).map(n=>({name:n}));
+    try{
+      const resp=await fetch('https://api.scryfall.com/cards/collection',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({identifiers:batch})
+      });
+      if(!resp.ok){console.warn('Scryfall batch HTTP',resp.status);continue;}
+      const data=await resp.json();
+      if(data.object==='error'){console.warn('Scryfall error:',data.details);continue;}
+      for(const c of (data.data||[])){
+        // Image: prefer large for commander, normal for background cards
+        const img=c.image_uris?.normal||c.image_uris?.large||
+                  c.card_faces?.[0]?.image_uris?.normal||'';
+        const imgLg=c.image_uris?.large||c.image_uris?.normal||
+                    c.card_faces?.[0]?.image_uris?.large||img;
+        // Price: non-foil USD only — avoids collector edition inflation
+        const price=parseFloat(c.prices?.usd||'0')||0;
+        map[c.name]={img,imgLg,price};
+      }
+      // Log not_found for debugging
+      if(data.not_found?.length){
+        console.warn('Scryfall not_found:',data.not_found.map(x=>x.name||x.id));
+      }
+    }catch(e){console.warn('Scryfall fetch error:',e);}
+    // Small delay between batches
+    if(i+75<unique.length)await new Promise(r=>setTimeout(r,120));
+  }
+  return map;
 }
 
+// ── SPLASH CARDS ──────────────────────────────────────────────────────────
+async function loadSplash(){
+  const names=['Sol Ring','Command Tower','Arcane Signet','Lightning Bolt','Counterspell',
+    'Demonic Tutor','Swords to Plowshares','Cyclonic Rift','Rhystic Study','Smothering Tithe',
+    'Mana Crypt','Fierce Guardianship','Brainstorm','Birds of Paradise','Dark Ritual',
+    'Path to Exile','Cultivate',"Kodama's Reach",'Cultivate','Vanquisher\'s Banner'];
+  const map=await scryfallBatch([...new Set(names)]);
+  scatterCards(Object.values(map).map(v=>v.img));
+}
+
+// ── URL PARSE ────────────────────────────────────────────────────────────
 function parseUrl(u){
   let m=u.match(/archidekt\.com\/decks\/(\d+)/);
   if(m)return{src:'archidekt',id:m[1]};
@@ -404,121 +418,130 @@ function parseUrl(u){
   return null;
 }
 
+// ── FETCH ARCHIDEKT ──────────────────────────────────────────────────────
 async function fetchArchi(id){
   const enc=encodeURIComponent(`https://archidekt.com/api/decks/${id}/`);
   const r=await fetch(`/api/deck?url=${enc}`);
-  if(!r.ok)throw new Error(`Archidekt ${r.status}: Is the deck public?`);
+  if(!r.ok)throw new Error(`Archidekt HTTP ${r.status} — is the deck public?`);
   const d=await r.json();
-  const cards=(d.cards||[]).map(c=>{
+
+  if(!d.cards)throw new Error('Archidekt returned unexpected data. Check the deck URL.');
+
+  // IMPORTANT: use c.qty (defaults to 1) for correct total card count.
+  // Archidekt returns one entry per unique card, with qty for duplicates (basics).
+  const raw=[];
+  for(const c of d.cards){
     const oc=c.card?.oracleCard||{};
     const cats=(c.categories||[]).map(s=>s.toLowerCase());
     const types=(oc.types||[]).map(s=>s.toLowerCase());
     const oracle=(oc.oracleText||'').toLowerCase();
-    // Use non-foil USD price only — usdFoil excluded intentionally
-    const price=parseFloat(c.card?.prices?.usd||0)||0;
-    return{name:oc.name||'?',cmc:oc.cmc||0,ci:oc.colorIdentity||[],types,oracle,
-      isLand:types.includes('land'),isCmd:cats.includes('commander'),
-      sid:c.card?.uid||null,price,
-      isRamp:cats.some(s=>/ramp|mana.?accel/i.test(s))
-        ||(oracle.includes('add {')&&!types.includes('land'))
-        ||/add one mana|add two mana|add three mana/.test(oracle),
-      isDraw:cats.some(s=>/draw|card.?draw|card.?advantage/i.test(s))
-        ||/draw a card|draw two|draw three|draw four|draw x cards/.test(oracle),
-      isTutor:cats.some(s=>/tutor/i.test(s))||oracle.includes('search your library for'),
+    const qty=c.qty||1;
+    const isLand=types.includes('land');
+    const isCmd=cats.includes('commander');
+    const entry={
+      name: oc.name||'Unknown',
+      cmc:  oc.cmc||0,
+      ci:   oc.colorIdentity||[],
+      types, oracle, qty, isLand, isCmd,
+      isRamp: cats.some(s=>/ramp|mana.?accel/i.test(s))
+              ||(oracle.includes('add {')&&!isLand)
+              ||/add one mana|add two mana|add three mana/.test(oracle),
+      isDraw: cats.some(s=>/draw|card.?draw|card.?advan/i.test(s))
+              ||/draw a card|draw two|draw three|draw four|draw x cards/.test(oracle),
+      isTutor: cats.some(s=>/tutor/i.test(s))||oracle.includes('search your library for'),
     };
-  });
-  const cmd=cards.find(c=>c.isCmd)||cards[0];
-  return{cards,cmd,deckName:d.name||'Unnamed',colors:cmd?.ci||[]};
+    raw.push(entry);
+  }
+
+  const cmd=raw.find(c=>c.isCmd)||raw[0];
+  return{cards:raw,cmd,deckName:d.name||'Unnamed Deck',colors:cmd?.ci||[]};
 }
 
+// ── FETCH MOXFIELD ───────────────────────────────────────────────────────
 async function fetchMox(id){
   const enc=encodeURIComponent(`https://api.moxfield.com/v2/decks/all/${id}`);
   const r=await fetch(`/api/deck?url=${enc}`);
-  if(!r.ok)throw new Error(`Moxfield ${r.status}: Is the deck public?`);
+  if(!r.ok)throw new Error(`Moxfield HTTP ${r.status} — is the deck public?`);
   const d=await r.json();
-  const cards=[];
-  const push=(e,isCmd=false)=>{
-    const c=e.card||{};
-    const tl=(c.type_line||'').toLowerCase();
-    const oracle=(c.oracle_text||'').toLowerCase();
-    const price=parseFloat(c.prices?.usd||0)||0;
-    cards.push({name:c.name||'?',cmc:c.cmc||0,ci:c.color_identity||[],
-      types:[tl],oracle,isLand:tl.includes('land'),isCmd,
-      sid:c.scryfall_id||null,price,
-      isRamp:oracle.includes('add {')||/add one mana|add two mana/.test(oracle),
-      isDraw:/draw a card|draw two|draw cards/.test(oracle),
-      isTutor:oracle.includes('search your library for'),
-    });
+
+  const raw=[];
+  const push=(entries,isCmd=false)=>{
+    for(const e of Object.values(entries||{})){
+      const c=e.card||{};
+      const tl=(c.type_line||'').toLowerCase();
+      const oracle=(c.oracle_text||'').toLowerCase();
+      const qty=e.quantity||1;
+      const isLand=tl.includes('land');
+      raw.push({
+        name:c.name||'Unknown',cmc:c.cmc||0,ci:c.color_identity||[],
+        types:[tl],oracle,qty,isLand,isCmd,
+        isRamp: oracle.includes('add {')||/add one mana|add two mana/.test(oracle),
+        isDraw: /draw a card|draw two|draw cards/.test(oracle),
+        isTutor: oracle.includes('search your library for'),
+      });
+    }
   };
-  Object.values(d.commanders||{}).forEach(e=>push(e,true));
-  Object.values(d.mainboard||{}).forEach(e=>push(e,false));
-  const cmd=cards.find(c=>c.isCmd)||cards[0];
-  return{cards,cmd,deckName:d.name||'Unnamed',colors:cmd?.ci||[]};
+  push(d.commanders,true);
+  push(d.mainboard,false);
+
+  const cmd=raw.find(c=>c.isCmd)||raw[0];
+  return{cards:raw,cmd,deckName:d.name||'Unnamed Deck',colors:cmd?.ci||[]};
 }
 
-// Fetch commander image + 20 background card images in one Scryfall batch call
-async function fetchArt(deck){
-  const cmd=deck.cmd;
-  const sample=[...deck.cards].filter(c=>!c.isLand&&!c.isCmd)
-    .sort(()=>Math.random()-.5).slice(0,19);
+// ── SCORE CALC ────────────────────────────────────────────────────────────
+function calcScores(cards, sfMap){
+  // Expand by qty for correct totals
+  const expand=(arr)=>{
+    const out=[];
+    for(const c of arr)for(let i=0;i<(c.qty||1);i++)out.push(c);
+    return out;
+  };
 
-  // Single batch: commander + 19 random non-land cards = 20 items max
-  const ids=[
-    cmd.sid?{id:cmd.sid}:{name:cmd.name},
-    ...sample.map(c=>c.sid?{id:c.sid}:{name:c.name})
-  ];
+  // For analysis, use unique entries (avoid double-counting basics in ramp/draw)
+  const unique=cards;
+  const allCards=expand(cards);
+  const nonLandUniq=unique.filter(c=>!c.isLand&&!c.isCmd);
+  const totalCards=allCards.length;
+  const landCount=allCards.filter(c=>c.isLand).length;
 
-  let cmdImg='', bgImgs=[];
-  try{
-    const r=await fetch('https://api.scryfall.com/cards/collection',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({identifiers:ids})
-    });
-    const d=await r.json();
-    (d.data||[]).forEach((c,i)=>{
-      const img=c.image_uris?.normal||c.image_uris?.large||
-                c.card_faces?.[0]?.image_uris?.normal||'';
-      if(!img)return;
-      if(i===0)cmdImg=c.image_uris?.large||c.image_uris?.normal||
-                       c.card_faces?.[0]?.image_uris?.large||img;
-      else bgImgs.push(img);
-    });
-  }catch(e){console.warn('Scryfall art:',e);}
-  return{cmdImg,bgImgs};
-}
+  const avgCmc=nonLandUniq.length
+    ?nonLandUniq.reduce((s,c)=>s+(c.cmc||0),0)/nonLandUniq.length:0;
 
-function calcScores(cards){
-  const nonLand=cards.filter(c=>!c.isLand&&!c.isCmd);
-  const lands=cards.filter(c=>c.isLand);
-  const avgCmc=nonLand.length?nonLand.reduce((s,c)=>s+(c.cmc||0),0)/nonLand.length:0;
-  const gcCnt=cards.filter(c=>GC.has(c.name)).length;
-  const saltSum=cards.reduce((s,c)=>s+(SALT[c.name]||0),0);
-  const ramp=cards.filter(c=>c.isRamp&&!c.isLand).length;
-  const draw=cards.filter(c=>c.isDraw).length;
-  const tutor=cards.filter(c=>c.isTutor).length;
+  const gcCnt=unique.filter(c=>GC.has(c.name)).length;
+  const saltSum=unique.reduce((s,c)=>s+(SALT[c.name]||0),0);
+  const ramp=nonLandUniq.filter(c=>c.isRamp).length;
+  const draw=nonLandUniq.filter(c=>c.isDraw).length;
+  const tutor=nonLandUniq.filter(c=>c.isTutor).length;
 
-  // Prices already in deck data (non-foil USD from Archidekt/Moxfield)
-  const priced=nonLand.map(c=>c.price||0).filter(p=>p>0);
+  // Prices: from Scryfall map (non-foil USD)
+  // Use unique non-land cards only to avoid counting basics multiple times
+  const priced=nonLandUniq.map(c=>sfMap[c.name]?.price||0).filter(p=>p>0);
   const totalVal=priced.reduce((s,p)=>s+p,0);
   const avgPrice=priced.length?totalVal/priced.length:0;
-  const estDeckVal=priced.length>0?Math.round(totalVal*(nonLand.length/priced.length)):0;
+  // Estimate full non-land deck value (scale for any unpriced cards)
+  const estDeckVal=priced.length>0
+    ?Math.round(totalVal*(nonLandUniq.length/priced.length)):0;
 
+  // Bracket estimate
   let bkt=2;
   if(gcCnt===0&&tutor===0&&avgCmc>=3.5)bkt=1;
   else if(gcCnt>=1||tutor>=3)bkt=3;
   if(gcCnt>=3||(tutor>=5&&gcCnt>=2)||avgCmc<2.2)bkt=4;
 
+  // Mana curve (unique non-land, non-cmd)
   const curve=[0,1,2,3,4,5,6].map(n=>({
     lbl:n===6?'6+':String(n),
-    cnt:nonLand.filter(c=>n===6?(c.cmc||0)>=6:Math.floor(c.cmc||0)===n).length
+    cnt:nonLandUniq.filter(c=>n===6?(c.cmc||0)>=6:Math.floor(c.cmc||0)===n).length
   }));
 
+  // Subscores
   const sub={
     gameChangers:{pts:Math.min(18,gcCnt*4),max:18,lbl:'Game Changers',val:gcCnt},
     salt:{pts:saltSum<=6?3:saltSum<=18?7:saltSum<=36?11:saltSum<=58?15:17,max:17,lbl:'Est. Salt',val:saltSum.toFixed(1)},
     deckPrice:{
       pts:avgPrice<0.4?1:avgPrice<1?3:avgPrice<2.5?6:avgPrice<5?9:avgPrice<10?12:15,
-      max:15,lbl:'Deck Value',val:estDeckVal>0?`~$${estDeckVal.toLocaleString()}`:'—'
+      max:15,lbl:'Deck Value',
+      val:estDeckVal>0?`~$${estDeckVal.toLocaleString()}`:'—'
     },
     avgCmc:{pts:avgCmc>=4?2:avgCmc>=3.3?5:avgCmc>=2.8?9:avgCmc>=2.3?12:15,max:15,lbl:'Avg CMC',val:avgCmc.toFixed(2)},
     ramp:{pts:ramp<=4?2:ramp<=8?5:ramp<=12?9:12,max:12,lbl:'Ramp',val:ramp},
@@ -531,20 +554,25 @@ function calcScores(cards){
   const score=parseFloat(Math.max(1,Math.min(10,(1+(tot/mx)*9))).toFixed(1));
 
   return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,bkt,
-    landCnt:lands.length,cardCnt:cards.length,curve,avgPrice,estDeckVal};
+    landCount,totalCards,curve,avgPrice,estDeckVal};
 }
 
-function render(deck,sc,cmdImg,bgImgs){
+// ── RENDER ────────────────────────────────────────────────────────────────
+function render(deck,sc,sfMap){
   const{cmd,deckName,colors}=deck;
   const pal=getPal(colors);
   applyPal(pal);
 
-  scatterCards(bgImgs,document.getElementById('bg'));
-  fillHeaderStrip(bgImgs);
+  // All non-land images for background
+  const allImgs=Object.values(sfMap).map(v=>v.img).filter(Boolean);
+  scatterCards(allImgs);
+  fillHeader([...allImgs].sort(()=>Math.random()-.5));
 
+  // Header
   document.getElementById('r-name').textContent=deckName;
   document.getElementById('r-cmd').textContent=`${cmd.name} · ${pal.n}`;
 
+  // Color pips
   const pipsEl=document.getElementById('r-pips');pipsEl.innerHTML='';
   const sym={W:'☀',U:'💧',B:'💀',R:'🔥',G:'🌿',C:'◇'};
   (colors.length?colors:['C']).forEach(c=>{
@@ -552,15 +580,25 @@ function render(deck,sc,cmdImg,bgImgs){
     p.className=`pip p${c}`;p.textContent=sym[c]||c;pipsEl.appendChild(p);
   });
 
+  // Commander card image (use large version if available)
+  const cmdData=sfMap[cmd.name];
+  const cmdImg=cmdData?.imgLg||cmdData?.img||'';
   const imgEl=document.getElementById('r-img');
-  if(cmdImg){imgEl.src=cmdImg;imgEl.style.display='block';}
+  const phEl=document.getElementById('r-img-ph');
+  if(cmdImg){
+    imgEl.src=cmdImg;
+    imgEl.style.display='block';
+    if(phEl)phEl.style.display='none';
+  }
 
-  document.getElementById('r-cnt').textContent=sc.cardCnt;
+  // Stats
+  document.getElementById('r-cnt').textContent=sc.totalCards;
   document.getElementById('r-cmc').textContent=sc.avgCmc.toFixed(2);
-  document.getElementById('r-lands').textContent=sc.landCnt;
+  document.getElementById('r-lands').textContent=sc.landCount;
   document.getElementById('r-val').textContent=sc.estDeckVal>0?`~$${sc.estDeckVal.toLocaleString()}`:'—';
   document.getElementById('r-bkt').textContent=`Bracket ${sc.bkt}`;
 
+  // Score
   const tier=getTier(sc.score);
   const scoreEl=document.getElementById('r-score');
   scoreEl.innerHTML=`${sc.score}<span>/10</span>`;
@@ -568,14 +606,17 @@ function render(deck,sc,cmdImg,bgImgs){
   scoreEl.style.textShadow=`0 0 45px ${tier.color}88`;
   const tierEl=document.getElementById('r-tier');
   tierEl.textContent=`${tier.emoji} ${tier.label}`;
-  tierEl.style.color=tier.color;tierEl.style.borderColor=tier.color;tierEl.style.background=tier.color+'22';
+  tierEl.style.color=tier.color;tierEl.style.borderColor=tier.color;
+  tierEl.style.background=tier.color+'22';
   document.getElementById('r-desc').textContent=tier.desc;
 
+  // Needle
   setTimeout(()=>{
     document.getElementById('r-needle').style.left=`${((sc.score-1)/9)*100}%`;
     document.getElementById('r-needle').style.borderColor=tier.color;
   },200);
 
+  // Detail grid
   const dg=document.getElementById('r-dg');dg.innerHTML='';
   [{v:sc.gcCnt,n:'Game Changers'},{v:sc.saltSum.toFixed(0),n:'Est. Salt'},
    {v:sc.ramp,n:'Ramp Pieces'},{v:sc.draw,n:'Draw Spells'},
@@ -584,6 +625,7 @@ function render(deck,sc,cmdImg,bgImgs){
   ].forEach(d=>dg.insertAdjacentHTML('beforeend',
     `<div class="dc"><div class="dv">${d.v}</div><div class="dn">${d.n}</div></div>`));
 
+  // Score bars
   const barsEl=document.getElementById('r-bars');barsEl.innerHTML='';
   Object.values(sc.sub).forEach(s=>{
     const pct=Math.round((s.pts/s.max)*100);
@@ -599,19 +641,20 @@ function render(deck,sc,cmdImg,bgImgs){
   });
   setTimeout(()=>document.querySelectorAll('.bf').forEach(el=>el.style.width=el.dataset.t),300);
 
+  // Mana curve
   const curveEl=document.getElementById('r-curve');curveEl.innerHTML='';
   const mx=Math.max(...sc.curve.map(d=>d.cnt),1);
   sc.curve.forEach(d=>{
-    const h=Math.round((d.cnt/mx)*80);
     curveEl.insertAdjacentHTML('beforeend',`
       <div class="ccol">
         <div class="cnum">${d.cnt||''}</div>
-        <div class="cbar" style="height:${h}px"></div>
+        <div class="cbar" style="height:${Math.round((d.cnt/mx)*80)}px"></div>
         <div class="clbl">${d.lbl}</div>
       </div>`);
   });
 }
 
+// ── MAIN ─────────────────────────────────────────────────────────────────
 async function go(){
   const rawUrl=document.getElementById('url-in').value.trim();
   const btn=document.getElementById('eval-btn');
@@ -620,37 +663,59 @@ async function go(){
   err.style.display='none';
 
   const parsed=parseUrl(rawUrl);
-  if(!parsed){err.textContent='Please enter a valid Archidekt or Moxfield URL.';err.style.display='block';return;}
+  if(!parsed){
+    err.textContent='Please enter a valid Archidekt or Moxfield deck URL.';
+    err.style.display='block';return;
+  }
 
   btn.disabled=true;ld.style.display='block';
   try{
-    ld.textContent='📡 Fetching deck…';
+    // Step 1: fetch deck
+    ld.textContent='📡 Fetching deck list…';
     const deck=parsed.src==='archidekt'?await fetchArchi(parsed.id):await fetchMox(parsed.id);
 
-    ld.textContent='🎨 Fetching card art…';
-    const{cmdImg,bgImgs}=await fetchArt(deck);   // ONE batch call, ~1s
+    // Step 2: collect all unique card names (including commander, including lands for art)
+    // We want art for all non-land cards for the background
+    const allUniqueNames=[...new Set(deck.cards.map(c=>c.name))];
+    const nonLandNames=[...new Set(deck.cards.filter(c=>!c.isLand).map(c=>c.name))];
 
+    // Step 3: Scryfall batch — use non-land cards for background + prices
+    // This is ONE or TWO HTTP calls (75 cards per batch)
+    ld.textContent=`🃏 Fetching art & prices for ${nonLandNames.length} cards from Scryfall…`;
+    const sfMap=await scryfallBatch(nonLandNames);
+
+    // Step 4: calculate scores (prices come from sfMap)
     ld.textContent='⚡ Calculating power level…';
-    const sc=calcScores(deck.cards);              // prices already in deck data
+    const sc=calcScores(deck.cards,sfMap);
 
+    // Step 5: show results
     document.getElementById('is').style.display='none';
     document.getElementById('rs').style.display='block';
-    render(deck,sc,cmdImg,bgImgs);
+    render(deck,sc,sfMap);
+
   }catch(e){
     console.error(e);
     err.innerHTML=`⚠️ <strong>${e.message}</strong>`;
     err.style.display='block';
-  }finally{btn.disabled=false;ld.style.display='none';}
+  }finally{
+    btn.disabled=false;ld.style.display='none';
+  }
 }
 
 function goBack(){
   document.getElementById('rs').style.display='none';
   document.getElementById('is').style.display='block';
+  // Reset commander image
+  const img=document.getElementById('r-img');
+  img.style.display='none';img.src='';
+  const ph=document.getElementById('r-img-ph');
+  if(ph)ph.style.display='flex';
   applyPal(PAL['G']);
   loadSplash();
 }
 
 document.getElementById('url-in').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+// Load splash immediately on page load
 loadSplash();
 </script>
 </body>

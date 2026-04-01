@@ -192,6 +192,57 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   min-height:0;transition:height .9s cubic-bezier(.4,0,.2,1)}
 .clbl{font-size:12px;color:var(--m);margin-top:5px;font-weight:600}
 
+/* ── THEMES PANEL ── */
+.themes-pnl{padding:22px 26px;margin-bottom:18px}
+.theme-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.theme-tag{
+  padding:9px 16px;border-radius:30px;border:1px solid;
+  font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:7px;background:none;font-family:'Nunito Sans',sans-serif;
+}
+.theme-tag:hover{filter:brightness(1.3);transform:translateY(-1px)}
+.theme-count{
+  background:rgba(255,255,255,.15);border-radius:12px;
+  padding:2px 8px;font-size:11px;font-weight:700;
+}
+
+/* ── GAMEPLAN / AI PANEL ── */
+.gp-pnl{padding:24px 28px;margin-bottom:18px}
+.gp-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 24px;border-radius:14px;border:1px solid var(--bdr);
+  background:rgba(255,255,255,.04);color:var(--t);
+  font-family:'Nunito Sans',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;width:100%;justify-content:center;
+}
+.gp-btn:hover:not(:disabled){border-color:var(--a);background:rgba(var(--a),.15);color:var(--a)}
+.gp-btn:disabled{opacity:.45;cursor:not-allowed}
+.gp-note{font-size:11px;color:var(--m);opacity:.45;text-align:center;margin-top:10px}
+@keyframes gpPulse{0%,100%{opacity:.4}50%{opacity:1}}
+.gp-loading{text-align:center;color:var(--m);font-size:13px;padding:20px 0;
+  animation:gpPulse 1.4s infinite;display:none}
+.gp-result{margin-top:22px;display:none}
+.gp-gameplan{
+  background:rgba(255,255,255,.05);border-radius:14px;padding:18px 20px;
+  border-left:3px solid var(--a);font-size:15px;line-height:1.75;
+  color:var(--t);margin-bottom:20px;
+}
+.gp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.gp-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  border-radius:14px;padding:16px 18px;
+}
+.gp-card-title{
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:2.5px;
+  color:var(--m);text-transform:uppercase;margin-bottom:10px;
+}
+.gp-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.gp-list li{font-size:13px;line-height:1.5;color:var(--t);
+  padding-left:16px;position:relative;}
+.gp-list li::before{content:'·';position:absolute;left:4px;color:var(--a);font-size:16px;line-height:1.1}
+.gp-err{color:#ff9999;font-size:13px;margin-top:12px;padding:12px 16px;
+  background:rgba(200,60,60,.15);border-radius:10px;border:1px solid rgba(200,60,60,.3);}
+
 /* ── POPUP ── */
 #popup{position:fixed;inset:0;z-index:200;display:none;
   background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
@@ -337,9 +388,37 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
       <div class="sec-t">Mana Curve</div>
       <div class="curve-outer" id="r-curve"></div>
     </div>
+
+    <!-- Deck Themes / Plan -->
+    <div class="pnl themes-pnl" id="r-themes" style="display:none">
+      <div class="sec-t">Detected Themes <span style="font-family:'Nunito Sans',sans-serif;font-size:10px;opacity:.5;letter-spacing:.5px;text-transform:none;margin-left:8px">click any theme to see its cards</span></div>
+      <div class="theme-tags" id="r-theme-tags"></div>
+      <div style="font-size:11px;color:var(--m);opacity:.5;margin-top:12px;line-height:1.6">
+        Themes detected from oracle text. For deeper plan analysis, export your deck to an AI assistant with the commander context.
+      </div>
+    </div>
+
+    <!-- AI Gameplan Analysis -->
+    <div class="pnl gp-pnl" id="r-gp-pnl">
+      <div class="sec-t">AI Gameplan Analysis</div>
+      <button class="gp-btn" id="gp-btn" onclick="analyzeGameplan()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
+          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 16v-4m0-4h.01"/>
+        </svg>
+        Analyze Gameplan with AI
+      </button>
+      <div class="gp-note">Uses Claude AI · Requires <code>ANTHROPIC_API_KEY</code> in Vercel env vars</div>
+      <div class="gp-loading" id="gp-loading">🤖 Claude is reading your deck…</div>
+      <div class="gp-err" id="gp-err" style="display:none"></div>
+      <div class="gp-result" id="gp-result">
+        <div class="gp-gameplan" id="gp-gameplan"></div>
+        <div class="gp-grid" id="gp-grid"></div>
+      </div>
+    </div>
+
     <div class="fnote">
       Score: Game Changers (18) · Salt (17) · Deck Value (15) · Avg CMC (15) · Ramp (12) · Card Draw (12) · Tutors (11) → 1–10<br>
-      Prices: Scryfall non-foil USD. Click any category name to see cards. Card count includes all copies (basics etc).
+      Prices: Scryfall non-foil USD. Click any category name to see its cards. Recursion is shown as a stat but not scored (it overlaps draw).
     </div>
   </div>
 </div>
@@ -353,6 +432,8 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
 let G_sfMap={};       // name→{img,imgLg,imgBack,price}
 let G_cardLists={};   // category→[{name,manaCost}]
 let G_cmdFront='', G_cmdBack='', G_cmdFlipped=false;
+let G_deckData=null;  // full deck context for AI analysis
+let G_scoreData=null; // score context for AI analysis
 
 function flipCmd(){
   if(!G_cmdBack) return;
@@ -392,7 +473,7 @@ const GC=new Set(["Ad Nauseam","Armageddon","Bribery","Capture of Jingzhou",
 "Seedborn Muse","Sensei's Divining Top","Sheoldred, the Apocalypse","Smothering Tithe",
 "Stasis","Tainted Pact","Thassa's Oracle","Time Stretch","Time Warp","Treachery",
 "Underworld Breach","Vampiric Tutor","Vorinclex, Voice of Hunger","Winter Orb",
-"Worldly Tutor","Zur the Enchanter","Black Market Connections","Iona, Shield of Emeria",
+"Worldly Tutor","Zur the Enchanter","Iona, Shield of Emeria",
 "Karn Liberated","Vorinclex, Monstrous Raider"]);
 
 // ── SALT SCORES ────────────────────────────────────────────────────────────────
@@ -494,13 +575,12 @@ function scatterCards(imgs){
   if(!imgs||!imgs.length)return;
 
   const W=window.innerWidth,H=window.innerHeight;
-  const pool=[...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,30);
+  const pool=[...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,60);
   pool.forEach((src)=>{
     const el=document.createElement('img');
     el.className='bc';el.src=src;el.alt='';el.loading='lazy';
-    const w=80+Math.random()*100;
+    const w=Math.round((92+Math.random()*115)); // 15% bigger than before (80-100 → 92-207)
     const rot=(Math.random()-.5)*65;
-    // Random z-index so cards stack naturally on each other
     const z=Math.floor(Math.random()*20)+1;
     el.style.cssText=`
       left:${Math.random()*(W-w)}px;
@@ -555,13 +635,14 @@ function openPopup(category,label){
   } else {
     cards.forEach(c=>{
       const sf=G_sfMap[c.name];
-      const img=sf?.img||'';
       const price=sf?.price;
+      // Use cached image, or direct Scryfall image URL as fallback (handles room cards,
+      // any DFC variant, and any card we don't have cached from the batch)
+      const imgSrc=sf?.img||
+        `https://api.scryfall.com/cards/named?format=image&version=normal&fuzzy=${encodeURIComponent(c.name)}`;
       const el=document.createElement('div');
       el.className='popup-card';
-      el.innerHTML=img
-        ?`<img src="${img}" alt="${c.name}" loading="lazy">`
-        :`<div class="popup-card-ph">🃏</div>`;
+      el.innerHTML=`<img src="${imgSrc}" alt="${c.name}" loading="lazy" onerror="this.outerHTML='<div class=popup-card-ph>🃏</div>'">`;
       el.insertAdjacentHTML('beforeend',`
         <div class="popup-card-name">${c.name}</div>
         <div class="popup-card-cost">${c.manaCost||'—'}${price?' · $'+price.toFixed(2):''}</div>
@@ -687,7 +768,9 @@ async function fetchArchi(id){
              ||(oracle.includes('add {')&&!isLand)
              ||/add one mana|add two mana|add three mana/.test(oracle),
       isDraw:cats.some(s=>/draw|card.?draw|card.?advan/i.test(s))
-             ||/draw a card|draw two|draw three|draw four|draw x cards/.test(oracle),
+             ||/draw a card|draw two cards|draw three cards|draw four cards|draw x cards|draw cards|you draw/.test(oracle),
+      isRecursion:cats.some(s=>/recur|recursion|reani/i.test(s))
+             ||/from your graveyard to (your hand|the battlefield)|return target.*from.*graveyard|return.*graveyard.*to (your hand|the battlefield)/.test(oracle),
       isTutor:cats.some(s=>/tutor/i.test(s))||oracle.includes('search your library for'),
     });
   }
@@ -722,7 +805,8 @@ async function fetchMox(id){
         manaCost:c.mana_cost||'',
         types:[tl],oracle,qty,isLand,isCmd,
         isRamp:oracle.includes('add {')||/add one mana|add two mana/.test(oracle),
-        isDraw:/draw a card|draw two|draw cards/.test(oracle),
+        isDraw:/draw a card|draw two cards|draw three cards|draw x cards|draw cards|you draw/.test(oracle),
+        isRecursion:/from your graveyard to (your hand|the battlefield)|return target.*from.*graveyard|return.*graveyard.*to (your hand|the battlefield)/.test(oracle),
         isTutor:oracle.includes('search your library for'),
       });
     }
@@ -755,7 +839,56 @@ function calcScores(cards,sfMap){
   const rampList=nonLandUniq.filter(c=>c.isRamp);
   const drawList=nonLandUniq.filter(c=>c.isDraw);
   const tutorList=nonLandUniq.filter(c=>c.isTutor);
-  const ramp=rampList.length,draw=drawList.length,tutor=tutorList.length;
+  const recursionList=nonLandUniq.filter(c=>c.isRecursion);
+  const ramp=rampList.length,draw=drawList.length,tutor=tutorList.length,recursion=recursionList.length;
+
+  // ── THEME / PLAN DETECTION ─────────────────────────────────────────────────
+  // Heuristic keyword analysis across all non-land oracle text
+  // Each theme: {label, icon, color, patterns (tested against oracle), threshold}
+  const THEME_DEFS=[
+    {key:'lifeLoss',    icon:'🩸', label:'Life Loss / Drain', color:'#c04060',
+     patterns:[/lose \d+ life|opponents? lose|pay \d+ life|drain/],         min:5},
+    {key:'lifeGain',   icon:'💚', label:'Life Gain',           color:'#40b060',
+     patterns:[/you gain \d+ life|you gain life|lifelink/],                  min:6},
+    {key:'sacrifice',  icon:'💀', label:'Sacrifice Engine',    color:'#806030',
+     patterns:[/sacrifice a|sacrifice an|whenever.*sacrifice|sacrifice target(?! land)/], min:6},
+    {key:'graveyard',  icon:'🪦', label:'Graveyard Matters',   color:'#5848a0',
+     patterns:[/graveyard|from your graveyard|dies,|when.*dies/],            min:8},
+    {key:'tokens',     icon:'⚔️',  label:'Token Army',          color:'#c08030',
+     patterns:[/create.*token|creates.*token|token creature/],               min:5},
+    {key:'counters',   icon:'⬆️',  label:'+1/+1 Counters',      color:'#30a080',
+     patterns:[/\+1\/\+1 counter|put.*counter.*on|proliferate/],             min:5},
+    {key:'negCounters',icon:'⬇️',  label:'-1/-1 Counters',      color:'#a03050',
+     patterns:[/-1\/-1 counter/],                                            min:4},
+    {key:'spells',     icon:'✨', label:'Spells Matter',        color:'#4070c0',
+     patterns:[/when.*cast.*instant|when.*cast.*sorcery|whenever.*cast a noncreature/], min:5},
+    {key:'equipment',  icon:'🗡️', label:'Equipment / Voltron',  color:'#907030',
+     patterns:[/equip|equipment/],                                           min:4},
+    {key:'landfall',   icon:'🌍', label:'Landfall',             color:'#508040',
+     patterns:[/landfall/],                                                  min:3},
+    {key:'infect',     icon:'☠️', label:'Infect / Toxic',       color:'#508020',
+     patterns:[/infect|toxic \d/],                                           min:3},
+    {key:'wheels',     icon:'🎡', label:'Wheels',               color:'#6050b0',
+     patterns:[/each player discards.*hand|draw.*equal.*hand|wheel/],        min:2},
+    {key:'extra',      icon:'⏰', label:'Extra Turns',           color:'#b06820',
+     patterns:[/take an extra turn|additional turn/],                        min:2},
+    {key:'tribal',     icon:'👥', label:'Tribal',               color:'#406080',
+     patterns:[/other.*creatures you control|other.*get \+|elf is also a|all.*of the chosen type/], min:5},
+  ];
+
+  const themes=[];
+  for(const def of THEME_DEFS){
+    const matching=nonLandUniq.filter(c=>
+      def.patterns.some(p=>p.test(c.oracle))
+    );
+    if(matching.length>=def.min){
+      themes.push({
+        key:def.key,icon:def.icon,label:def.label,
+        color:def.color,count:matching.length,
+        cards:matching.map(c=>({name:c.name,manaCost:c.manaCost}))
+      });
+    }
+  }
 
   // Prices from Scryfall (non-foil USD per unique card name)
   const priced=nonLandUniq.map(c=>sfMap[c.name]?.price||0).filter(p=>p>0);
@@ -802,14 +935,18 @@ function calcScores(cards,sfMap){
     deckPrice: nonLandUniq.filter(c=>sfMap[c.name]?.price>0)
                .sort((a,b)=>(sfMap[b.name]?.price||0)-(sfMap[a.name]?.price||0))
                .map(c=>({name:c.name,manaCost:c.manaCost})),
-    avgCmc: nonLandUniq.sort((a,b)=>(a.cmc||0)-(b.cmc||0)).map(c=>({name:c.name,manaCost:c.manaCost})),
+    avgCmc: [...nonLandUniq].sort((a,b)=>(a.cmc||0)-(b.cmc||0)).map(c=>({name:c.name,manaCost:c.manaCost})),
     ramp: rampList.map(c=>({name:c.name,manaCost:c.manaCost})),
     draw: drawList.map(c=>({name:c.name,manaCost:c.manaCost})),
     tutors: tutorList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    recursion: recursionList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    // Theme lists are stored on the theme objects themselves
   };
+  // Register theme card lists so popup works
+  themes.forEach(t=>{ cardLists[t.key]=t.cards; });
 
-  return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,bkt,
-    landCount,totalCards,curve,avgPrice,estDeckVal,cardLists};
+  return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,recursion,bkt,
+    landCount,totalCards,curve,avgPrice,estDeckVal,cardLists,themes};
 }
 
 // ── RENDER ─────────────────────────────────────────────────────────────────────
@@ -820,6 +957,14 @@ function render(deck,sc,sfMap){
 
   G_sfMap=sfMap;
   G_cardLists=sc.cardLists;
+  G_deckData=deck;
+  G_scoreData=sc;
+
+  // Reset gameplan panel
+  document.getElementById('gp-btn').disabled=false;
+  document.getElementById('gp-loading').style.display='none';
+  document.getElementById('gp-err').style.display='none';
+  document.getElementById('gp-result').style.display='none';
 
   // Background
   const allImgs=Object.values(sfMap).map(v=>v.img).filter(Boolean);
@@ -885,7 +1030,7 @@ function render(deck,sc,sfMap){
   const dg=document.getElementById('r-dg');dg.innerHTML='';
   [{v:sc.gcCnt,n:'Game Changers'},{v:sc.saltSum.toFixed(0),n:'Est. Salt'},
    {v:sc.ramp,n:'Ramp Pieces'},{v:sc.draw,n:'Draw Spells'},
-   {v:sc.tutor,n:'Tutors'},
+   {v:sc.recursion,n:'Recursion'},{v:sc.tutor,n:'Tutors'},
    {v:sc.estDeckVal>0?`$${sc.estDeckVal.toLocaleString()}`:'—',n:'Est. Value'},
   ].forEach(d=>dg.insertAdjacentHTML('beforeend',
     `<div class="dc"><div class="dv">${d.v}</div><div class="dn">${d.n}</div></div>`));
@@ -907,6 +1052,17 @@ function render(deck,sc,sfMap){
   });
   setTimeout(()=>document.querySelectorAll('.bf').forEach(el=>el.style.width=el.dataset.t),300);
 
+  // Recursion — unscored KPI, clickable
+  const recRow=document.createElement('div');
+  recRow.className='brow';
+  recRow.innerHTML=`
+    <div class="bh">
+      <span class="bn" onclick="openPopup('recursion','Recursion')" style="opacity:.75">Recursion <span style="font-size:10px;font-weight:400;opacity:.6">(info only)</span></span>
+      <span class="bp" style="opacity:.75">${sc.recursion}<span class="bval"> pieces</span></span>
+    </div>
+    <div class="bt"><div class="bf" style="width:${Math.min(100,sc.recursion*8)}%" ></div></div>`;
+  document.getElementById('r-bars').appendChild(recRow);
+
   // Mana curve
   const curveEl=document.getElementById('r-curve');curveEl.innerHTML='';
   const mx=Math.max(...sc.curve.map(d=>d.cnt),1);
@@ -918,6 +1074,105 @@ function render(deck,sc,sfMap){
         <div class="clbl">${d.lbl}</div>
       </div>`);
   });
+
+  // Themes / Plan panel
+  const themesEl=document.getElementById('r-themes');
+  if(sc.themes&&sc.themes.length){
+    themesEl.style.display='block';
+    const tagsEl=document.getElementById('r-theme-tags');
+    tagsEl.innerHTML='';
+    sc.themes.forEach(t=>{
+      const tag=document.createElement('button');
+      tag.className='theme-tag';
+      tag.style.borderColor=t.color+'88';
+      tag.style.background=t.color+'18';
+      tag.style.color=t.color;
+      tag.innerHTML=`${t.icon} ${t.label} <span class="theme-count">${t.count}</span>`;
+      tag.onclick=()=>openPopup(t.key,`${t.icon} ${t.label}`);
+      tagsEl.appendChild(tag);
+    });
+  } else {
+    themesEl.style.display='none';
+  }
+}
+
+// ── AI GAMEPLAN ANALYSIS ──────────────────────────────────────────────────────
+async function analyzeGameplan(){
+  if(!G_deckData||!G_scoreData) return;
+  const btn=document.getElementById('gp-btn');
+  const loading=document.getElementById('gp-loading');
+  const errEl=document.getElementById('gp-err');
+  const result=document.getElementById('gp-result');
+
+  btn.disabled=true;
+  loading.style.display='block';
+  errEl.style.display='none';
+  result.style.display='none';
+
+  try{
+    const sc=G_scoreData;
+    const deck=G_deckData;
+    const cardNames=deck.cards
+      .filter(c=>!c.isLand&&!c.isCmd)
+      .map(c=>c.name);
+
+    const resp=await fetch('/api/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        commander: deck.cmd.name,
+        colors: deck.colors,
+        deckName: deck.deckName,
+        cardNames,
+        themes: sc.themes?.map(t=>t.label)||[],
+        score: sc.score,
+        stats:{
+          avgCmc:sc.avgCmc,
+          ramp:sc.ramp,
+          draw:sc.draw,
+          tutor:sc.tutor,
+          recursion:sc.recursion,
+          estDeckVal:sc.estDeckVal,
+        }
+      })
+    });
+
+    const data=await resp.json();
+    if(!resp.ok||data.error){
+      errEl.textContent=`⚠️ ${data.error||'Unknown error'}`;
+      errEl.style.display='block';
+      return;
+    }
+
+    // Render gameplan
+    document.getElementById('gp-gameplan').textContent=data.gameplan||'—';
+
+    const sections=[
+      {title:'🏆 Win Conditions',  key:'wincons'},
+      {title:'⚡ Key Synergies',   key:'keysynergies'},
+      {title:'⚠️ Weaknesses',      key:'weaknesses'},
+      {title:'💡 Tips',            key:'tips'},
+    ];
+    const grid=document.getElementById('gp-grid');
+    grid.innerHTML='';
+    sections.forEach(s=>{
+      const items=data[s.key]||[];
+      if(!items.length) return;
+      const card=document.createElement('div');
+      card.className='gp-card';
+      card.innerHTML=`<div class="gp-card-title">${s.title}</div>
+        <ul class="gp-list">${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+      grid.appendChild(card);
+    });
+
+    result.style.display='block';
+  }catch(e){
+    errEl.textContent=`⚠️ ${e.message}`;
+    errEl.style.display='block';
+  }finally{
+    btn.disabled=false;
+    loading.style.display='none';
+  }
 }
 
 // ── MAIN ───────────────────────────────────────────────────────────────────────
@@ -975,6 +1230,7 @@ function goBack(){
   if(ph)ph.style.display='flex';
   G_sfMap={};G_cardLists={};
   G_cmdFront='';G_cmdBack='';G_cmdFlipped=false;
+  G_deckData=null;G_scoreData=null;
   document.getElementById('r-flip-btn').style.display='none';
   applyPal(PAL['G']);
   loadSplash();

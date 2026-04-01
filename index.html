@@ -125,6 +125,7 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
 #bg-wrap{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;}
 #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,var(--bg1) 68%);
+  opacity:.88;
   transition:background 1s;}
 
 /* ── APP ── */
@@ -132,7 +133,15 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   justify-content:center;padding:28px 20px}
 
 /* ── INPUT ── */
-#is{text-align:center;max-width:600px;width:100%}
+#is{text-align:center;max-width:600px;width:100%;display:flex;flex-direction:column;align-items:center}
+.is-panel{
+  width:100%;padding:36px 40px 32px;
+  background:var(--pnl);border:1px solid var(--bdr);border-radius:24px;
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  box-shadow:0 16px 60px rgba(0,0,0,.55),0 0 0 1px var(--bdr);
+  margin-bottom:16px;
+}
+@media(max-width:500px){.is-panel{padding:24px 20px 20px}}
 .logo{font-family:'Cinzel',serif;font-size:clamp(30px,7vw,52px);font-weight:900;
   letter-spacing:3px;line-height:1.1;margin-bottom:8px;color:var(--a);
   text-shadow:0 0 60px color-mix(in srgb,var(--a) 55%,transparent),0 2px 12px rgba(0,0,0,.8);}
@@ -433,20 +442,23 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
 
 <!-- INPUT -->
 <div id="is">
-  <div class="logo">⚔ PowerEDH<span class="logo-sub">Commander Deck Evaluator</span></div>
-  <div class="tagline">Paste your Archidekt or Moxfield link.<br>Cards, art, prices — all automatic.</div>
-  <div class="url-wrap">
-    <input id="url-in" class="url-in" type="text"
-      placeholder="https://archidekt.com/decks/1234567/my_deck"
-      autocomplete="off" spellcheck="false"/>
-    <button id="eval-btn" class="url-btn" onclick="go()">EVALUATE</button>
+  <!-- Main entry panel -->
+  <div class="is-panel">
+    <div class="logo">⚔ PowerEDH<span class="logo-sub">Commander Deck Evaluator</span></div>
+    <div class="tagline">Paste your Archidekt or Moxfield link.<br>Cards, art, prices — all automatic.</div>
+    <div class="url-wrap">
+      <input id="url-in" class="url-in" type="text"
+        placeholder="https://archidekt.com/decks/1234567/my_deck"
+        autocomplete="off" spellcheck="false"/>
+      <button id="eval-btn" class="url-btn" onclick="go()">EVALUATE</button>
+    </div>
+    <div id="err-msg" class="err"></div>
+    <div id="ld">Summoning your deck…</div>
+    <div class="hint">Decks must be public · Prices from Scryfall (non-foil USD) · Archidekt recommended</div>
   </div>
-  <div id="err-msg" class="err"></div>
-  <div id="ld">Summoning your deck…</div>
-  <div class="hint">Decks must be public · Prices from Scryfall (non-foil USD) · Archidekt recommended</div>
 
-  <!-- HISTORY / FAVOURITES -->
-  <div id="history-section" style="display:none">
+  <!-- HISTORY / FAVOURITES panel -->
+  <div id="history-section" class="pnl" style="display:none;width:100%;padding:22px 24px">
     <div class="hist-header">
       <div>Recent &amp; Favourites</div>
       <button class="hist-clear" onclick="clearHistory()">Clear history</button>

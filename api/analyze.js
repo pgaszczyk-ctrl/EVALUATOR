@@ -60,22 +60,35 @@ Return ONLY valid JSON, no markdown fences, no text outside:
 aiKpi scores: integers 0-10. weightReasons: only for weights that differ meaningfully from 1.0. offTheme: 3-6 cards maximum, empty array if deck is cohesive. Be specific — name actual cards.`;
 
 async function callGemini(apiKey, promptText) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: promptText }] }],
-      generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
-    }),
-    signal: AbortSignal.timeout(28000),
-  });
-  if (!r.ok) {
-    const body = await r.text();
-    throw new Error(`Gemini ${r.status}: ${body.slice(0, 200)}`);
+  // Try models in order until one works — Google renames/deprecates frequently
+  const models = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash-001'];
+  let lastErr = '';
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    try {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+        }),
+        signal: AbortSignal.timeout(28000),
+      });
+      if (!r.ok) {
+        const body = await r.text();
+        lastErr = `Gemini ${model} ${r.status}: ${body.slice(0, 150)}`;
+        continue; // try next model
+      }
+      const data = await r.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!text) { lastErr = `Gemini ${model}: empty response`; continue; }
+      return text;
+    } catch (e) {
+      lastErr = `Gemini ${model}: ${e.message}`;
+    }
   }
-  const data = await r.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  throw new Error(lastErr || 'All Gemini models failed');
 }
 
 async function callAnthropic(apiKey, promptText) {

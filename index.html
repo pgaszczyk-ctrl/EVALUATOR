@@ -18,14 +18,18 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
 
 /* ── BACKGROUND ── */
 #bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+/* Cards have NO per-card opacity — fully opaque so they stack realistically */
 .bc{position:absolute;border-radius:8px;pointer-events:none;display:block;
-  box-shadow:0 8px 30px rgba(0,0,0,.65);opacity:0;transition:opacity 1.4s ease;}
+  box-shadow:0 8px 30px rgba(0,0,0,.7);}
+/* Single wrapper div gets the opacity treatment */
+#bg-wrap{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;}
 #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,var(--bg1) 70%);
+  background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,var(--bg1) 68%);
   transition:background 1s;}
 
 /* ── APP ── */
-#app{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 20px}
+#app{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;
+  justify-content:center;padding:28px 20px}
 
 /* ── INPUT ── */
 #is{text-align:center;max-width:600px;width:100%}
@@ -48,7 +52,8 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   border:1px solid rgba(200,60,60,.4);border-radius:10px;font-size:13px;
   color:#ffaaaa;display:none;line-height:1.7;text-align:left;}
 @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
-#ld{margin-top:18px;font-size:14px;color:var(--a);display:none;animation:pulse 1.4s infinite;letter-spacing:.5px}
+#ld{margin-top:18px;font-size:14px;color:var(--a);display:none;
+  animation:pulse 1.4s infinite;letter-spacing:.5px}
 .hint{margin-top:20px;font-size:12px;color:var(--m);opacity:.5;line-height:1.8}
 
 /* ── RESULTS ── */
@@ -60,92 +65,174 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   display:inline-flex;align-items:center;gap:6px;}
 .back:hover{border-color:var(--a);color:var(--a)}
 .pnl{background:var(--pnl);border:1px solid var(--bdr);border-radius:20px;
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 8px 40px rgba(0,0,0,.45);}
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:0 8px 40px rgba(0,0,0,.45);}
 
 /* ── HEADER ── */
 .hdr{padding:22px 28px;display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:14px;margin-bottom:18px;position:relative;overflow:hidden;}
-/* card strip inside header */
-.hdr-strip{position:absolute;inset:0;display:flex;align-items:center;pointer-events:none;
-  overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,black 10%,black 90%,transparent 100%);
-  mask-image:linear-gradient(90deg,transparent 0%,black 10%,black 90%,transparent 100%);}
-.hc{flex-shrink:0;border-radius:6px;display:block;opacity:.22;
-  box-shadow:0 4px 16px rgba(0,0,0,.5);}
-.hdr-text{position:relative;z-index:1}
-.hdr-title{font-family:'Cinzel',serif;font-size:clamp(15px,2.4vw,23px);font-weight:900;letter-spacing:.5px}
+  flex-wrap:wrap;gap:14px;margin-bottom:18px;position:relative;overflow:hidden;min-height:80px;}
+/* Card strip — NO per-card opacity. The strip container itself fades in */
+.hdr-strip{position:absolute;inset:0;display:flex;align-items:center;
+  pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1.2s ease;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,black 8%,black 92%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,black 8%,black 92%,transparent 100%);}
+/* Individual header cards: fully opaque, stacked via z-index */
+.hc{flex-shrink:0;border-radius:7px;display:block;position:relative;
+  box-shadow:0 6px 24px rgba(0,0,0,.7);}
+.hdr-text{position:relative;z-index:10}
+.hdr-title{font-family:'Cinzel',serif;font-size:clamp(15px,2.4vw,23px);
+  font-weight:900;letter-spacing:.5px}
 .hdr-sub{font-size:14px;color:var(--a);margin-top:3px;font-weight:600}
-.pips{display:flex;gap:9px;align-items:center;position:relative;z-index:1}
-.pip{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:16px;box-shadow:0 2px 10px rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.18);flex-shrink:0}
-.pW{background:#f5f0de;color:#4a3a10}.pU{background:#1a4a90;color:#c8e8ff}
-.pB{background:#1a1230;color:#c0a8e0}.pR{background:#c83020;color:#ffe0d0}
-.pG{background:#1a6a20;color:#c8f5c8}.pC{background:#888;color:#f0f0f0}
+
+/* ── COLOR IDENTITY ── */
+.color-id{display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+  position:relative;z-index:10}
+.pips{display:flex;gap:8px;align-items:center}
+/* Pure color circles — no text inside */
+.pip{width:30px;height:30px;border-radius:50%;
+  box-shadow:0 2px 10px rgba(0,0,0,.6);
+  border:2px solid rgba(255,255,255,.25);flex-shrink:0}
+.pW{background:#f0e8c8}.pU{background:#1a4a90}
+.pB{background:#1a1230}.pR{background:#c83020}
+.pG{background:#1a6a20}.pC{background:#707070}
+.guild-name{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;
+  color:var(--a);text-transform:uppercase;text-align:right}
 
 /* ── MAIN GRID ── */
 .mg{display:grid;grid-template-columns:270px 1fr;gap:18px;margin-bottom:18px}
 @media(max-width:700px){.mg{grid-template-columns:1fr}}
-
-/* left col */
 .lc{padding:22px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .cmd-img{width:196px;border-radius:14px;display:none;
   box-shadow:0 14px 50px rgba(0,0,0,.75),0 0 0 2px var(--bdr);
   transition:transform .3s;cursor:pointer;}
 .cmd-img:hover{transform:scale(1.04) rotate(-1.5deg)}
-.cmd-placeholder{width:196px;height:274px;border-radius:14px;
+.cmd-ph{width:196px;height:274px;border-radius:14px;
   background:rgba(255,255,255,.04);border:1px solid var(--bdr);
   display:flex;align-items:center;justify-content:center;
-  font-size:40px;color:var(--m);opacity:.4}
+  font-size:42px;color:var(--m);opacity:.3}
 .statrow{width:100%;display:flex;justify-content:space-between;align-items:center;
   padding:11px 16px;background:rgba(255,255,255,.05);border-radius:11px;
   font-size:14px;border:1px solid rgba(255,255,255,.05);}
 .sl{color:var(--m)}.sv{font-weight:700;font-size:16px;color:var(--a)}
-
-/* right col */
 .rc{padding:26px 28px}
-.sc-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:14px;margin-bottom:20px}
 .sc-lbl{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--m);margin-bottom:5px}
-.big-sc{font-family:'Cinzel',serif;font-size:clamp(72px,12vw,108px);font-weight:900;line-height:1;
-  color:var(--a);text-shadow:0 0 40px color-mix(in srgb,var(--a) 55%,transparent);transition:color .6s,text-shadow .6s;}
+.big-sc{font-family:'Cinzel',serif;font-size:clamp(72px,12vw,108px);font-weight:900;
+  line-height:1;color:var(--a);
+  text-shadow:0 0 40px color-mix(in srgb,var(--a) 55%,transparent);
+  transition:color .6s,text-shadow .6s;}
 .big-sc span{font-size:26px;color:var(--m);font-family:'Nunito Sans',sans-serif;font-weight:400}
 .tier-badge{padding:12px 22px;border-radius:40px;font-family:'Cinzel',serif;font-size:17px;
-  font-weight:700;border:2px solid;display:inline-flex;align-items:center;gap:10px;white-space:nowrap;transition:all .6s;}
+  font-weight:700;border:2px solid;display:inline-flex;align-items:center;gap:10px;
+  white-space:nowrap;transition:all .6s;}
 .tier-desc{font-size:13px;color:var(--m);margin-top:8px;font-style:italic;opacity:.8}
 .band-wrap{margin-bottom:20px}
 .band{height:12px;border-radius:6px;position:relative;overflow:visible;
   background:linear-gradient(90deg,#4a9a4a 0%,#c9a84c 35%,#c07030 60%,#c84040 100%)}
 .needle{position:absolute;top:-5px;width:22px;height:22px;background:#fff;border-radius:50%;
   transform:translateX(-50%);box-shadow:0 2px 10px rgba(0,0,0,.5);
-  transition:left 1.2s cubic-bezier(.4,0,.2,1),border-color .6s;border:3px solid var(--a);left:0%;}
+  transition:left 1.2s cubic-bezier(.4,0,.2,1),border-color .6s;
+  border:3px solid var(--a);left:0%;}
 .tier-lbs{display:flex;justify-content:space-between;margin-top:5px}
 .tlb{font-size:9px;color:var(--m);letter-spacing:.3px}
 .dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin:18px 0}
-.dc{padding:14px 10px;background:rgba(255,255,255,.04);border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+.dc{padding:14px 10px;background:rgba(255,255,255,.04);border-radius:12px;
+  text-align:center;border:1px solid rgba(255,255,255,.06)}
 .dv{font-size:24px;font-weight:900;color:var(--a);font-family:'Cinzel',serif}
-.dn{font-size:10px;color:var(--m);margin-top:3px;letter-spacing:.4px;text-transform:uppercase;line-height:1.3}
+.dn{font-size:10px;color:var(--m);margin-top:3px;letter-spacing:.4px;
+  text-transform:uppercase;line-height:1.3}
+
+/* ── SCORE BARS ── */
 .bars{display:flex;flex-direction:column;gap:13px}
 .brow .bh{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}
-.bn{font-weight:700}.bp{color:var(--a);font-weight:700}
+/* Clickable category name */
+.bn{font-weight:700;cursor:pointer;transition:color .15s;user-select:none}
+.bn:hover{color:var(--a);text-decoration:underline dotted;text-underline-offset:3px}
+.bn::after{content:' ↗';font-size:10px;opacity:.5}
+.bp{color:var(--a);font-weight:700}
 .bval{color:var(--m);font-weight:400;font-size:12px}
 .bt{height:9px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden}
 .bf{height:100%;border-radius:5px;transition:width 1.2s cubic-bezier(.4,0,.2,1);
   background:linear-gradient(90deg,var(--a2),var(--a))}
+
+/* ── MANA CURVE ── */
 .curve-pnl{padding:22px 26px;margin-bottom:18px}
-.sec-t{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--m);text-transform:uppercase;margin-bottom:16px}
+.sec-t{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--m);
+  text-transform:uppercase;margin-bottom:16px}
 .curve-outer{height:100px;display:flex;align-items:flex-end;gap:6px}
-.ccol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
-.cnum{font-size:12px;color:var(--m);font-weight:700;min-height:18px;display:flex;align-items:center;justify-content:center}
-.cbar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(to top,var(--a2),var(--a));min-height:0;transition:height .9s cubic-bezier(.4,0,.2,1)}
+.ccol{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-end;height:100%}
+.cnum{font-size:12px;color:var(--m);font-weight:700;min-height:18px;
+  display:flex;align-items:center;justify-content:center}
+.cbar{width:100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(to top,var(--a2),var(--a));
+  min-height:0;transition:height .9s cubic-bezier(.4,0,.2,1)}
 .clbl{font-size:12px;color:var(--m);margin-top:5px;font-weight:600}
-.fnote{text-align:center;font-size:11px;color:rgba(255,255,255,.2);padding-bottom:20px;margin-top:6px;line-height:1.9}
+
+/* ── POPUP ── */
+#popup{position:fixed;inset:0;z-index:200;display:none;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;padding:20px}
+#popup.open{display:flex}
+.popup-box{
+  background:var(--pnl);border:1px solid var(--bdr);border-radius:20px;
+  max-width:860px;width:100%;max-height:85vh;display:flex;flex-direction:column;
+  box-shadow:0 20px 80px rgba(0,0,0,.8);overflow:hidden;
+}
+.popup-head{padding:20px 24px;display:flex;justify-content:space-between;
+  align-items:center;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.popup-title{font-family:'Cinzel',serif;font-size:18px;font-weight:900;color:var(--a)}
+.popup-subtitle{font-size:12px;color:var(--m);margin-top:2px}
+.popup-close{background:none;border:1px solid var(--bdr);color:var(--m);
+  width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.popup-close:hover{border-color:var(--a);color:var(--a)}
+.popup-body{overflow-y:auto;padding:20px 24px;flex:1}
+/* card grid inside popup */
+.popup-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.popup-card{display:flex;flex-direction:column;align-items:center;gap:8px;
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px;cursor:pointer;transition:border-color .15s;}
+.popup-card:hover{border-color:var(--a)}
+.popup-card img{width:100%;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.6);display:block}
+.popup-card-name{font-size:12px;font-weight:700;text-align:center;
+  color:var(--t);line-height:1.3}
+.popup-card-cost{font-size:11px;color:var(--m);text-align:center;font-family:monospace}
+.popup-card-ph{width:100%;aspect-ratio:2/3;border-radius:8px;
+  background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;
+  color:var(--m);font-size:28px}
+
+/* ── FOOTER ── */
+.fnote{text-align:center;font-size:11px;color:rgba(255,255,255,.2);
+  padding-bottom:20px;margin-top:6px;line-height:1.9}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 </style>
 </head>
 <body>
-<div id="bg"></div>
+<div id="bg"><div id="bg-wrap"></div></div>
 <div id="veil"></div>
+
+<!-- POPUP -->
+<div id="popup" onclick="closePopup()">
+  <div class="popup-box" onclick="event.stopPropagation()">
+    <div class="popup-head">
+      <div>
+        <div class="popup-title" id="popup-title">Cards</div>
+        <div class="popup-subtitle" id="popup-subtitle"></div>
+      </div>
+      <button class="popup-close" onclick="closePopup()">✕</button>
+    </div>
+    <div class="popup-body">
+      <div class="popup-cards" id="popup-cards"></div>
+    </div>
+  </div>
+</div>
+
 <div id="app">
 
+<!-- INPUT -->
 <div id="is">
   <div class="logo">⚔ PowerEDH<span class="logo-sub">Commander Deck Evaluator</span></div>
   <div class="tagline">Paste your Archidekt or Moxfield link.<br>Cards, art, prices — all automatic.</div>
@@ -157,24 +244,33 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   </div>
   <div id="err-msg" class="err"></div>
   <div id="ld">Summoning your deck…</div>
-  <div class="hint">Decks must be public · Prices from Scryfall non-foil USD · Archidekt recommended</div>
+  <div class="hint">Decks must be public · Prices from Scryfall (non-foil USD) · Archidekt recommended</div>
 </div>
 
+<!-- RESULTS -->
 <div id="rs">
   <button class="back" onclick="goBack()">← New Deck</button>
   <div class="rs-in">
+
+    <!-- Header with card strip -->
     <div class="pnl hdr">
       <div class="hdr-strip" id="hdr-strip"></div>
       <div class="hdr-text">
         <div class="hdr-title" id="r-name">Deck</div>
         <div class="hdr-sub" id="r-cmd">Commander</div>
       </div>
-      <div class="pips" id="r-pips"></div>
+      <div class="color-id">
+        <div class="pips" id="r-pips"></div>
+        <div class="guild-name" id="r-guild"></div>
+      </div>
     </div>
+
     <div class="mg">
+      <!-- Left: commander + stats -->
       <div class="pnl lc">
-        <img id="r-img" class="cmd-img" src="" alt="" onerror="this.style.display='none'">
-        <div id="r-img-ph" class="cmd-placeholder">🧙</div>
+        <img id="r-img" class="cmd-img" src="" alt=""
+          onerror="this.style.display='none';document.getElementById('r-img-ph').style.display='flex'">
+        <div id="r-img-ph" class="cmd-ph">🧙</div>
         <div style="width:100%;display:flex;flex-direction:column;gap:8px">
           <div class="statrow"><span class="sl">Total Cards</span><span class="sv" id="r-cnt">—</span></div>
           <div class="statrow"><span class="sl">Avg CMC</span><span class="sv" id="r-cmc">—</span></div>
@@ -183,6 +279,7 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
           <div class="statrow"><span class="sl">Est. Bracket</span><span class="sv" id="r-bkt">—</span></div>
         </div>
       </div>
+      <!-- Right: score -->
       <div class="pnl rc">
         <div class="sc-top">
           <div>
@@ -204,22 +301,29 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
         <div class="bars" id="r-bars"></div>
       </div>
     </div>
+
+    <!-- Mana curve -->
     <div class="pnl curve-pnl">
       <div class="sec-t">Mana Curve</div>
       <div class="curve-outer" id="r-curve"></div>
     </div>
     <div class="fnote">
-      Score: Game Changers (18) · Salt Estimate (17) · Deck Value (15) · Avg CMC (15) · Ramp (12) · Card Draw (12) · Tutors (11) → scaled 1–10<br>
-      Prices: Scryfall non-foil USD per card (cheapest standard printing). Card count includes all copies of basics.
+      Score: Game Changers (18) · Salt (17) · Deck Value (15) · Avg CMC (15) · Ramp (12) · Card Draw (12) · Tutors (11) → 1–10<br>
+      Prices: Scryfall non-foil USD. Click any category name to see cards. Card count includes all copies (basics etc).
     </div>
   </div>
 </div>
 
 </div><!-- #app -->
+
 <script>
 'use strict';
 
-// ── GAME CHANGERS (WotC official) ──────────────────────────────────────────
+// ── GLOBALS ───────────────────────────────────────────────────────────────────
+let G_sfMap={};       // name→{img,imgLg,price}
+let G_cardLists={};   // category→[{name,manaCost}]
+
+// ── GAME CHANGERS ──────────────────────────────────────────────────────────────
 const GC=new Set(["Ad Nauseam","Armageddon","Bribery","Capture of Jingzhou",
 "Chain of Smog","Chrome Mox","Consecrated Sphinx","Contamination","Crop Rotation",
 "Cyclonic Rift","Deflecting Swat","Demonic Consultation","Demonic Tutor",
@@ -235,7 +339,7 @@ const GC=new Set(["Ad Nauseam","Armageddon","Bribery","Capture of Jingzhou",
 "Worldly Tutor","Zur the Enchanter","Black Market Connections","Iona, Shield of Emeria",
 "Karn Liberated","Vorinclex, Monstrous Raider"]);
 
-// ── SALT SCORES (EDHREC) ───────────────────────────────────────────────────
+// ── SALT SCORES ────────────────────────────────────────────────────────────────
 const SALT={"Stasis":3.06,"Armageddon":2.98,"Winter Orb":2.95,"Cyclonic Rift":2.85,
 "Rhystic Study":2.82,"Smothering Tithe":2.74,"Mana Crypt":2.70,"Tergrid, God of Fright":2.52,
 "Expropriate":2.50,"Vorinclex, Voice of Hunger":2.48,"Thassa's Oracle":2.45,
@@ -249,16 +353,16 @@ const SALT={"Stasis":3.06,"Armageddon":2.98,"Winter Orb":2.95,"Cyclonic Rift":2.
 "Sheoldred, the Apocalypse":1.88,"Jin-Gitaxias, Progress Tyrant":1.80,
 "Grand Arbiter Augustin IV":1.80,"Time Stretch":1.80,"Bribery":1.78,
 "Imperial Seal":1.75,"Capture of Jingzhou":1.75,"Praetor's Grasp":1.70,
-"Zur the Enchanter":1.70,"Flash":1.72,"Iona, Shield of Emeria":2.30,"Mana Vault":1.65,
-"Grim Monolith":1.58,"Jeweled Lotus":1.60,"Deflecting Swat":1.60,"Mox Diamond":1.55,
-"Force of Will":1.55,"Chrome Mox":1.45,"Sensei's Divining Top":1.45,
+"Zur the Enchanter":1.70,"Flash":1.72,"Iona, Shield of Emeria":2.30,
+"Mana Vault":1.65,"Grim Monolith":1.58,"Jeweled Lotus":1.60,"Deflecting Swat":1.60,
+"Mox Diamond":1.55,"Force of Will":1.55,"Chrome Mox":1.45,"Sensei's Divining Top":1.45,
 "Underworld Breach":1.68,"Tainted Pact":1.62,"Demonic Consultation":1.58,
 "Mystical Tutor":1.50,"Intuition":1.50,"Natural Order":1.40,"Green Sun's Zenith":1.35,
 "Worldly Tutor":1.30,"Crop Rotation":1.10,"Sol Ring":0.5,
 "Black Market Connections":1.50,"Karn Liberated":1.65,
 "Decree of Annihilation":2.80,"Ravages of War":2.75,"Obliterate":2.65};
 
-// ── COLOR PALETTES ────────────────────────────────────────────────────────
+// ── COLOR PALETTES ─────────────────────────────────────────────────────────────
 const PAL={
 '':  {n:'Colorless',bg1:'#111118',bg2:'#181824',a:'#9898c8',a2:'#5858a0',t:'#e0e0f0',m:'#7878a0',p:'rgba(20,20,36,.88)',b:'rgba(150,150,200,.22)'},
 'W': {n:'White',    bg1:'#2e2010',bg2:'#3e2c18',a:'#e8c84a',a2:'#c8a020',t:'#fff8e8',m:'#b09860',p:'rgba(54,40,17,.90)',b:'rgba(232,200,74,.28)'},
@@ -286,12 +390,22 @@ const PAL={
 'GUW':{n:'Bant',    bg1:'#0e1c0e',bg2:'#0e1828',a:'#68d870',a2:'#5090d0',t:'#e8ffe8',m:'#68a870',p:'rgba(13,30,18,.88)',b:'rgba(104,216,112,.22)'},
 'GBR':{n:'Jund',    bg1:'#180e08',bg2:'#100c10',a:'#d07818',a2:'#408030',t:'#f8e8c0',m:'#a08040',p:'rgba(27,18,11,.90)',b:'rgba(208,120,24,.22)'},
 'BUW':{n:'Esper',   bg1:'#10101e',bg2:'#1a1628',a:'#a060d8',a2:'#90b0e0',t:'#e8e0ff',m:'#7868b0',p:'rgba(17,15,36,.90)',b:'rgba(160,96,216,.22)'},
+'BGRW':{n:'Yore-Tiller',bg1:'#18100e',bg2:'#12101c',a:'#c06830',a2:'#8048a0',t:'#ffe0d0',m:'#906858',p:'rgba(28,18,16,.90)',b:'rgba(192,104,48,.22)'},
+'BGRU':{n:'Glint-Eye',  bg1:'#0c0c10',bg2:'#141018',a:'#40a8c0',a2:'#806890',t:'#d0e8f0',m:'#5080a0',p:'rgba(14,14,22,.90)',b:'rgba(64,168,192,.22)'},
+'BGUW':{n:'Witch-Maw',  bg1:'#0e1410',bg2:'#161218',a:'#80b840',a2:'#5850a8',t:'#d8f0c8',m:'#608870',p:'rgba(15,22,18,.90)',b:'rgba(128,184,64,.22)'},
+'BRUW':{n:'Artifice',   bg1:'#180c0a',bg2:'#100e1a',a:'#e06030',a2:'#6080c8',t:'#ffe0d0',m:'#a06060',p:'rgba(28,15,14,.90)',b:'rgba(224,96,48,.22)'},
+'GRUW':{n:'Chaos',      bg1:'#0c1410',bg2:'#181008',a:'#38b860',a2:'#c87828',t:'#d8f0d8',m:'#60a070',p:'rgba(14,22,16,.88)',b:'rgba(56,184,96,.22)'},
+'BGRUW':{n:'WUBRG',     bg1:'#14100e',bg2:'#100e14',a:'#d0a030',a2:'#8060a8',t:'#f5f0e0',m:'#a09080',p:'rgba(24,18,16,.90)',b:'rgba(208,160,48,.25)'},
 };
 function getPal(ci){
-  const k=[...ci].sort().join('');
+  if(!ci||!ci.length)return PAL[''];
+  // Normalize and sort
+  const norm=ci.map(c=>c.toUpperCase().trim()).filter(c=>/^[WUBRG]$/.test(c));
+  if(!norm.length)return PAL[''];
+  const k=norm.sort().join('');
   if(PAL[k])return PAL[k];
-  if(ci.length>=4)return{n:'Five-Color',bg1:'#1a1418',bg2:'#14181a',a:'#d0a030',a2:'#8060a8',t:'#f5f0e0',m:'#a09080',p:'rgba(30,24,28,.90)',b:'rgba(208,160,48,.25)'};
-  for(const c of ci)if(PAL[c])return PAL[c];
+  // fallback: single color
+  for(const c of norm)if(PAL[c])return PAL[c];
   return PAL['G'];
 }
 function applyPal(p){
@@ -301,10 +415,10 @@ function applyPal(p){
   });
   document.body.style.background=`linear-gradient(135deg,${p.bg1} 0%,${p.bg2} 100%)`;
   document.getElementById('veil').style.background=
-    `radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,${p.bg1} 70%)`;
+    `radial-gradient(ellipse 90% 90% at 50% 50%,transparent 0%,${p.bg1} 68%)`;
 }
 
-// ── TIERS ─────────────────────────────────────────────────────────────────
+// ── TIERS ───────────────────────────────────────────────────────────────────────
 const TIERS=[
   {min:1,  max:2.4, label:'Precon',       emoji:'🌱',color:'#5a9a5a',desc:'Straight from the box. No real threat at the table.'},
   {min:2.5,max:4.4, label:'Casual',       emoji:'🐾',color:'#4880c8',desc:'Fun kitchen table deck with a clear plan.'},
@@ -314,102 +428,141 @@ const TIERS=[
 ];
 const getTier=s=>TIERS.find(t=>s>=t.min&&s<=t.max)||TIERS[0];
 
-// ── BACKGROUND SCATTER ───────────────────────────────────────────────────
+// ── BACKGROUND SCATTER ────────────────────────────────────────────────────────
+// Cards are fully opaque — they stack on top of each other realistically.
+// ONE wrapper div gets opacity so the pile fades in as a unit.
 function scatterCards(imgs){
-  const bg=document.getElementById('bg');
-  bg.innerHTML='';
+  const wrap=document.getElementById('bg-wrap');
+  wrap.innerHTML='';
+  wrap.style.opacity='0';
   if(!imgs||!imgs.length)return;
+
   const W=window.innerWidth,H=window.innerHeight;
-  const pool=[...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,32);
-  pool.forEach(src=>{
+  const pool=[...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,30);
+  pool.forEach((src)=>{
     const el=document.createElement('img');
-    el.className='bc';
-    el.src=src;el.alt='';el.loading='lazy';
-    const w=78+Math.random()*95;
+    el.className='bc';el.src=src;el.alt='';el.loading='lazy';
+    const w=80+Math.random()*100;
     const rot=(Math.random()-.5)*65;
-    const op=(0.16+Math.random()*0.24).toFixed(2);
-    el.style.left=`${Math.random()*(W-w)}px`;
-    el.style.top=`${Math.random()*(H-40)}px`;
-    el.style.width=`${w}px`;
-    el.style.transform=`rotate(${rot}deg)`;
+    // Random z-index so cards stack naturally on each other
+    const z=Math.floor(Math.random()*20)+1;
+    el.style.cssText=`
+      left:${Math.random()*(W-w)}px;
+      top:${Math.random()*(H-20)}px;
+      width:${w}px;
+      transform:rotate(${rot}deg);
+      z-index:${z};
+    `;
     el.onerror=()=>el.remove();
-    document.getElementById('bg').appendChild(el);
-    // Staggered fade-in: must happen after append
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.opacity=op;}));
+    wrap.appendChild(el);
   });
+  // Fade in whole pile as one
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{wrap.style.opacity='0.5';}));
 }
 
-// ── HEADER STRIP ──────────────────────────────────────────────────────────
+// ── HEADER CARD STRIP ──────────────────────────────────────────────────────────
+// Bigger cards (6-8), heavy overlap, stacked z-index, opacity on strip container only.
 function fillHeader(imgs){
   const strip=document.getElementById('hdr-strip');
   strip.innerHTML='';
+  strip.style.opacity='0';
   if(!imgs||!imgs.length)return;
-  [...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,14).forEach((src,i)=>{
+
+  const cards=[...imgs].filter(Boolean).sort(()=>Math.random()-.5).slice(0,7);
+  cards.forEach((src,i)=>{
     const img=document.createElement('img');
     img.className='hc';img.src=src;img.alt='';
-    const h=100+Math.random()*60;
-    const rot=(Math.random()-.5)*18;
-    const ty=(Math.random()-.5)*35;
+    const h=120+Math.random()*65;  // bigger: 120-185px tall
+    const rot=(Math.random()-.5)*20;
+    const ty=(Math.random()-.5)*38;
     img.style.height=`${h}px`;
     img.style.transform=`rotate(${rot}deg) translateY(${ty}px)`;
-    img.style.marginLeft=i===0?'8px':`-${8+Math.random()*18}px`;
+    // Heavy overlap — each card sits ~50px behind the next
+    img.style.marginLeft=i===0?'10px':`-${30+Math.random()*22}px`;
+    img.style.zIndex=i; // later = on top, so the right side stacks over left
     img.onerror=()=>img.remove();
     strip.appendChild(img);
   });
+  // Fade strip in as unit
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{strip.style.opacity='1';}));
 }
 
-// ── SCRYFALL BATCH ────────────────────────────────────────────────────────
-// Returns map: { canonicalName -> { img, price } }
-// Uses ONLY card names — never IDs (Archidekt UIDs are not Scryfall card IDs)
+// ── POPUP ──────────────────────────────────────────────────────────────────────
+function openPopup(category,label){
+  const cards=G_cardLists[category]||[];
+  document.getElementById('popup-title').textContent=label;
+  document.getElementById('popup-subtitle').textContent=`${cards.length} card${cards.length!==1?'s':''} detected`;
+  const grid=document.getElementById('popup-cards');
+  grid.innerHTML='';
+  if(!cards.length){
+    grid.innerHTML=`<p style="color:var(--m);font-size:14px;padding:8px">No cards found in this category.</p>`;
+  } else {
+    cards.forEach(c=>{
+      const sf=G_sfMap[c.name];
+      const img=sf?.img||'';
+      const price=sf?.price;
+      const el=document.createElement('div');
+      el.className='popup-card';
+      el.innerHTML=img
+        ?`<img src="${img}" alt="${c.name}" loading="lazy">`
+        :`<div class="popup-card-ph">🃏</div>`;
+      el.insertAdjacentHTML('beforeend',`
+        <div class="popup-card-name">${c.name}</div>
+        <div class="popup-card-cost">${c.manaCost||'—'}${price?' · $'+price.toFixed(2):''}</div>
+      `);
+      grid.appendChild(el);
+    });
+  }
+  document.getElementById('popup').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePopup(){
+  document.getElementById('popup').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup();});
+
+// ── SCRYFALL BATCH ─────────────────────────────────────────────────────────────
 async function scryfallBatch(names){
   const map={};
   if(!names.length)return map;
-  // Deduplicate
   const unique=[...new Set(names)];
-  // Batch into groups of 75 (Scryfall limit)
   for(let i=0;i<unique.length;i+=75){
     const batch=unique.slice(i,i+75).map(n=>({name:n}));
     try{
       const resp=await fetch('https://api.scryfall.com/cards/collection',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
+        method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({identifiers:batch})
       });
-      if(!resp.ok){console.warn('Scryfall batch HTTP',resp.status);continue;}
+      if(!resp.ok){console.warn('Scryfall batch',resp.status);continue;}
       const data=await resp.json();
-      if(data.object==='error'){console.warn('Scryfall error:',data.details);continue;}
-      for(const c of (data.data||[])){
-        // Image: prefer large for commander, normal for background cards
+      for(const c of(data.data||[])){
         const img=c.image_uris?.normal||c.image_uris?.large||
                   c.card_faces?.[0]?.image_uris?.normal||'';
         const imgLg=c.image_uris?.large||c.image_uris?.normal||
                     c.card_faces?.[0]?.image_uris?.large||img;
-        // Price: non-foil USD only — avoids collector edition inflation
         const price=parseFloat(c.prices?.usd||'0')||0;
         map[c.name]={img,imgLg,price};
       }
-      // Log not_found for debugging
-      if(data.not_found?.length){
-        console.warn('Scryfall not_found:',data.not_found.map(x=>x.name||x.id));
-      }
-    }catch(e){console.warn('Scryfall fetch error:',e);}
-    // Small delay between batches
-    if(i+75<unique.length)await new Promise(r=>setTimeout(r,120));
+      if(data.not_found?.length)
+        console.warn('Scryfall not found:',data.not_found.map(x=>x.name||JSON.stringify(x)));
+    }catch(e){console.warn('Scryfall error:',e);}
+    if(i+75<unique.length)await new Promise(r=>setTimeout(r,100));
   }
   return map;
 }
 
-// ── SPLASH CARDS ──────────────────────────────────────────────────────────
+// ── SPLASH ─────────────────────────────────────────────────────────────────────
 async function loadSplash(){
   const names=['Sol Ring','Command Tower','Arcane Signet','Lightning Bolt','Counterspell',
     'Demonic Tutor','Swords to Plowshares','Cyclonic Rift','Rhystic Study','Smothering Tithe',
     'Mana Crypt','Fierce Guardianship','Brainstorm','Birds of Paradise','Dark Ritual',
-    'Path to Exile','Cultivate',"Kodama's Reach",'Cultivate','Vanquisher\'s Banner'];
-  const map=await scryfallBatch([...new Set(names)]);
+    'Path to Exile','Cultivate',"Kodama's Reach",'Vanquisher\'s Banner','Chaos Warp'];
+  const map=await scryfallBatch(names);
   scatterCards(Object.values(map).map(v=>v.img));
 }
 
-// ── URL PARSE ────────────────────────────────────────────────────────────
+// ── URL PARSE ──────────────────────────────────────────────────────────────────
 function parseUrl(u){
   let m=u.match(/archidekt\.com\/decks\/(\d+)/);
   if(m)return{src:'archidekt',id:m[1]};
@@ -418,107 +571,104 @@ function parseUrl(u){
   return null;
 }
 
-// ── FETCH ARCHIDEKT ──────────────────────────────────────────────────────
+// ── FETCH ARCHIDEKT ────────────────────────────────────────────────────────────
 async function fetchArchi(id){
   const enc=encodeURIComponent(`https://archidekt.com/api/decks/${id}/`);
   const r=await fetch(`/api/deck?url=${enc}`);
   if(!r.ok)throw new Error(`Archidekt HTTP ${r.status} — is the deck public?`);
   const d=await r.json();
-
   if(!d.cards)throw new Error('Archidekt returned unexpected data. Check the deck URL.');
 
-  // IMPORTANT: use c.qty (defaults to 1) for correct total card count.
-  // Archidekt returns one entry per unique card, with qty for duplicates (basics).
   const raw=[];
   for(const c of d.cards){
     const oc=c.card?.oracleCard||{};
     const cats=(c.categories||[]).map(s=>s.toLowerCase());
     const types=(oc.types||[]).map(s=>s.toLowerCase());
     const oracle=(oc.oracleText||'').toLowerCase();
-    const qty=c.qty||1;
+    const qty=Math.max(1,c.qty||1);
     const isLand=types.includes('land');
     const isCmd=cats.includes('commander');
-    const entry={
-      name: oc.name||'Unknown',
-      cmc:  oc.cmc||0,
-      ci:   oc.colorIdentity||[],
-      types, oracle, qty, isLand, isCmd,
-      isRamp: cats.some(s=>/ramp|mana.?accel/i.test(s))
-              ||(oracle.includes('add {')&&!isLand)
-              ||/add one mana|add two mana|add three mana/.test(oracle),
-      isDraw: cats.some(s=>/draw|card.?draw|card.?advan/i.test(s))
-              ||/draw a card|draw two|draw three|draw four|draw x cards/.test(oracle),
-      isTutor: cats.some(s=>/tutor/i.test(s))||oracle.includes('search your library for'),
-    };
-    raw.push(entry);
+    raw.push({
+      name:oc.name||'Unknown',
+      cmc:oc.cmc||0,
+      // Normalize to uppercase single letters W/U/B/R/G
+      ci:(oc.colorIdentity||[]).map(x=>String(x).toUpperCase().trim()).filter(x=>/^[WUBRG]$/.test(x)),
+      manaCost:oc.manaCost||'',
+      types,oracle,qty,isLand,isCmd,
+      isRamp:cats.some(s=>/ramp|mana.?accel/i.test(s))
+             ||(oracle.includes('add {')&&!isLand)
+             ||/add one mana|add two mana|add three mana/.test(oracle),
+      isDraw:cats.some(s=>/draw|card.?draw|card.?advan/i.test(s))
+             ||/draw a card|draw two|draw three|draw four|draw x cards/.test(oracle),
+      isTutor:cats.some(s=>/tutor/i.test(s))||oracle.includes('search your library for'),
+    });
   }
-
   const cmd=raw.find(c=>c.isCmd)||raw[0];
-  return{cards:raw,cmd,deckName:d.name||'Unnamed Deck',colors:cmd?.ci||[]};
+  // Use deck-level colorIdentity if available and non-empty
+  const deckCI=(d.colorIdentity||[]).map(x=>String(x).toUpperCase().trim()).filter(x=>/^[WUBRG]$/.test(x));
+  const colors=deckCI.length?deckCI:(cmd?.ci||[]);
+  return{cards:raw,cmd,deckName:d.name||'Unnamed Deck',colors};
 }
 
-// ── FETCH MOXFIELD ───────────────────────────────────────────────────────
+// ── FETCH MOXFIELD ─────────────────────────────────────────────────────────────
 async function fetchMox(id){
   const enc=encodeURIComponent(`https://api.moxfield.com/v2/decks/all/${id}`);
   const r=await fetch(`/api/deck?url=${enc}`);
   if(!r.ok)throw new Error(`Moxfield HTTP ${r.status} — is the deck public?`);
   const d=await r.json();
-
   const raw=[];
   const push=(entries,isCmd=false)=>{
     for(const e of Object.values(entries||{})){
       const c=e.card||{};
       const tl=(c.type_line||'').toLowerCase();
       const oracle=(c.oracle_text||'').toLowerCase();
-      const qty=e.quantity||1;
+      const qty=Math.max(1,e.quantity||1);
       const isLand=tl.includes('land');
       raw.push({
-        name:c.name||'Unknown',cmc:c.cmc||0,ci:c.color_identity||[],
+        name:c.name||'Unknown',cmc:c.cmc||0,
+        ci:(c.color_identity||[]).map(x=>String(x).toUpperCase().trim()).filter(x=>/^[WUBRG]$/.test(x)),
+        manaCost:c.mana_cost||'',
         types:[tl],oracle,qty,isLand,isCmd,
-        isRamp: oracle.includes('add {')||/add one mana|add two mana/.test(oracle),
-        isDraw: /draw a card|draw two|draw cards/.test(oracle),
-        isTutor: oracle.includes('search your library for'),
+        isRamp:oracle.includes('add {')||/add one mana|add two mana/.test(oracle),
+        isDraw:/draw a card|draw two|draw cards/.test(oracle),
+        isTutor:oracle.includes('search your library for'),
       });
     }
   };
   push(d.commanders,true);
   push(d.mainboard,false);
-
   const cmd=raw.find(c=>c.isCmd)||raw[0];
   return{cards:raw,cmd,deckName:d.name||'Unnamed Deck',colors:cmd?.ci||[]};
 }
 
-// ── SCORE CALC ────────────────────────────────────────────────────────────
-function calcScores(cards, sfMap){
-  // Expand by qty for correct totals
-  const expand=(arr)=>{
-    const out=[];
-    for(const c of arr)for(let i=0;i<(c.qty||1);i++)out.push(c);
-    return out;
-  };
+// ── SCORE CALC ─────────────────────────────────────────────────────────────────
+function calcScores(cards,sfMap){
+  // Total card count respects qty (basics counted multiple times)
+  let totalCards=0,landCount=0;
+  for(const c of cards){
+    const q=c.qty||1;
+    totalCards+=q;
+    if(c.isLand)landCount+=q;
+  }
 
-  // For analysis, use unique entries (avoid double-counting basics in ramp/draw)
-  const unique=cards;
-  const allCards=expand(cards);
-  const nonLandUniq=unique.filter(c=>!c.isLand&&!c.isCmd);
-  const totalCards=allCards.length;
-  const landCount=allCards.filter(c=>c.isLand).length;
-
+  // Unique non-land, non-commander entries for analysis
+  const nonLandUniq=cards.filter(c=>!c.isLand&&!c.isCmd);
   const avgCmc=nonLandUniq.length
     ?nonLandUniq.reduce((s,c)=>s+(c.cmc||0),0)/nonLandUniq.length:0;
 
-  const gcCnt=unique.filter(c=>GC.has(c.name)).length;
-  const saltSum=unique.reduce((s,c)=>s+(SALT[c.name]||0),0);
-  const ramp=nonLandUniq.filter(c=>c.isRamp).length;
-  const draw=nonLandUniq.filter(c=>c.isDraw).length;
-  const tutor=nonLandUniq.filter(c=>c.isTutor).length;
+  const gcList=cards.filter(c=>GC.has(c.name)&&!c.isCmd);
+  const gcCnt=gcList.length;
+  const saltSum=cards.reduce((s,c)=>s+(SALT[c.name]||0),0);
 
-  // Prices: from Scryfall map (non-foil USD)
-  // Use unique non-land cards only to avoid counting basics multiple times
+  const rampList=nonLandUniq.filter(c=>c.isRamp);
+  const drawList=nonLandUniq.filter(c=>c.isDraw);
+  const tutorList=nonLandUniq.filter(c=>c.isTutor);
+  const ramp=rampList.length,draw=drawList.length,tutor=tutorList.length;
+
+  // Prices from Scryfall (non-foil USD per unique card name)
   const priced=nonLandUniq.map(c=>sfMap[c.name]?.price||0).filter(p=>p>0);
   const totalVal=priced.reduce((s,p)=>s+p,0);
   const avgPrice=priced.length?totalVal/priced.length:0;
-  // Estimate full non-land deck value (scale for any unpriced cards)
   const estDeckVal=priced.length>0
     ?Math.round(totalVal*(nonLandUniq.length/priced.length)):0;
 
@@ -528,66 +678,83 @@ function calcScores(cards, sfMap){
   else if(gcCnt>=1||tutor>=3)bkt=3;
   if(gcCnt>=3||(tutor>=5&&gcCnt>=2)||avgCmc<2.2)bkt=4;
 
-  // Mana curve (unique non-land, non-cmd)
+  // Mana curve
   const curve=[0,1,2,3,4,5,6].map(n=>({
     lbl:n===6?'6+':String(n),
     cnt:nonLandUniq.filter(c=>n===6?(c.cmc||0)>=6:Math.floor(c.cmc||0)===n).length
   }));
 
-  // Subscores
+  // Sub-scores (raw max=100)
   const sub={
-    gameChangers:{pts:Math.min(18,gcCnt*4),max:18,lbl:'Game Changers',val:gcCnt},
-    salt:{pts:saltSum<=6?3:saltSum<=18?7:saltSum<=36?11:saltSum<=58?15:17,max:17,lbl:'Est. Salt',val:saltSum.toFixed(1)},
+    gameChangers:{pts:Math.min(18,gcCnt*4),max:18,lbl:'Game Changers',val:gcCnt,key:'gameChangers'},
+    salt:{pts:saltSum<=6?3:saltSum<=18?7:saltSum<=36?11:saltSum<=58?15:17,max:17,lbl:'Est. Salt',val:saltSum.toFixed(1),key:'salt'},
     deckPrice:{
       pts:avgPrice<0.4?1:avgPrice<1?3:avgPrice<2.5?6:avgPrice<5?9:avgPrice<10?12:15,
-      max:15,lbl:'Deck Value',
-      val:estDeckVal>0?`~$${estDeckVal.toLocaleString()}`:'—'
+      max:15,lbl:'Deck Value',val:estDeckVal>0?`~$${estDeckVal.toLocaleString()}`:'—',key:'deckPrice'
     },
-    avgCmc:{pts:avgCmc>=4?2:avgCmc>=3.3?5:avgCmc>=2.8?9:avgCmc>=2.3?12:15,max:15,lbl:'Avg CMC',val:avgCmc.toFixed(2)},
-    ramp:{pts:ramp<=4?2:ramp<=8?5:ramp<=12?9:12,max:12,lbl:'Ramp',val:ramp},
-    draw:{pts:draw<=4?2:draw<=8?5:draw<=12?9:12,max:12,lbl:'Card Draw',val:draw},
-    tutors:{pts:tutor===0?0:tutor<=2?3:tutor<=4?7:tutor<=6?9:11,max:11,lbl:'Tutors',val:tutor},
+    avgCmc:{pts:avgCmc>=4?2:avgCmc>=3.3?5:avgCmc>=2.8?9:avgCmc>=2.3?12:15,max:15,lbl:'Avg CMC',val:avgCmc.toFixed(2),key:'avgCmc'},
+    ramp:{pts:ramp<=4?2:ramp<=8?5:ramp<=12?9:12,max:12,lbl:'Ramp',val:ramp,key:'ramp'},
+    draw:{pts:draw<=4?2:draw<=8?5:draw<=12?9:12,max:12,lbl:'Card Draw',val:draw,key:'draw'},
+    tutors:{pts:tutor===0?0:tutor<=2?3:tutor<=4?7:tutor<=6?9:11,max:11,lbl:'Tutors',val:tutor,key:'tutors'},
   };
 
   const tot=Object.values(sub).reduce((s,v)=>s+v.pts,0);
   const mx=Object.values(sub).reduce((s,v)=>s+v.max,0);
   const score=parseFloat(Math.max(1,Math.min(10,(1+(tot/mx)*9))).toFixed(1));
 
+  // Card lists for popup (store {name, manaCost} per category)
+  const cardLists={
+    gameChangers: gcList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    salt: cards.filter(c=>SALT[c.name]>0).map(c=>({name:c.name,manaCost:c.manaCost}))
+               .sort((a,b)=>(SALT[b.name]||0)-(SALT[a.name]||0)),
+    deckPrice: nonLandUniq.filter(c=>sfMap[c.name]?.price>0)
+               .sort((a,b)=>(sfMap[b.name]?.price||0)-(sfMap[a.name]?.price||0))
+               .map(c=>({name:c.name,manaCost:c.manaCost})),
+    avgCmc: nonLandUniq.sort((a,b)=>(a.cmc||0)-(b.cmc||0)).map(c=>({name:c.name,manaCost:c.manaCost})),
+    ramp: rampList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    draw: drawList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    tutors: tutorList.map(c=>({name:c.name,manaCost:c.manaCost})),
+  };
+
   return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,bkt,
-    landCount,totalCards,curve,avgPrice,estDeckVal};
+    landCount,totalCards,curve,avgPrice,estDeckVal,cardLists};
 }
 
-// ── RENDER ────────────────────────────────────────────────────────────────
+// ── RENDER ─────────────────────────────────────────────────────────────────────
 function render(deck,sc,sfMap){
   const{cmd,deckName,colors}=deck;
   const pal=getPal(colors);
   applyPal(pal);
 
-  // All non-land images for background
+  G_sfMap=sfMap;
+  G_cardLists=sc.cardLists;
+
+  // Background
   const allImgs=Object.values(sfMap).map(v=>v.img).filter(Boolean);
   scatterCards(allImgs);
   fillHeader([...allImgs].sort(()=>Math.random()-.5));
 
   // Header
   document.getElementById('r-name').textContent=deckName;
-  document.getElementById('r-cmd').textContent=`${cmd.name} · ${pal.n}`;
+  document.getElementById('r-cmd').textContent=cmd.name;
 
-  // Color pips
+  // Color pips — pure colored circles, NO text inside
   const pipsEl=document.getElementById('r-pips');pipsEl.innerHTML='';
-  const sym={W:'☀',U:'💧',B:'💀',R:'🔥',G:'🌿',C:'◇'};
-  (colors.length?colors:['C']).forEach(c=>{
+  const norm=colors.length?[...new Set(colors.map(c=>c.toUpperCase()))]:['C'];
+  norm.forEach(c=>{
     const p=document.createElement('div');
-    p.className=`pip p${c}`;p.textContent=sym[c]||c;pipsEl.appendChild(p);
+    p.className=`pip p${c}`;
+    pipsEl.appendChild(p);
   });
+  document.getElementById('r-guild').textContent=pal.n; // e.g. "Sultai"
 
-  // Commander card image (use large version if available)
-  const cmdData=sfMap[cmd.name];
-  const cmdImg=cmdData?.imgLg||cmdData?.img||'';
+  // Commander image (use large if available)
+  const cmdSf=sfMap[cmd.name];
+  const cmdImg=cmdSf?.imgLg||cmdSf?.img||'';
   const imgEl=document.getElementById('r-img');
   const phEl=document.getElementById('r-img-ph');
   if(cmdImg){
-    imgEl.src=cmdImg;
-    imgEl.style.display='block';
+    imgEl.src=cmdImg;imgEl.style.display='block';
     if(phEl)phEl.style.display='none';
   }
 
@@ -600,23 +767,22 @@ function render(deck,sc,sfMap){
 
   // Score
   const tier=getTier(sc.score);
-  const scoreEl=document.getElementById('r-score');
-  scoreEl.innerHTML=`${sc.score}<span>/10</span>`;
-  scoreEl.style.color=tier.color;
-  scoreEl.style.textShadow=`0 0 45px ${tier.color}88`;
+  document.getElementById('r-score').innerHTML=`${sc.score}<span>/10</span>`;
+  document.getElementById('r-score').style.color=tier.color;
+  document.getElementById('r-score').style.textShadow=`0 0 45px ${tier.color}88`;
   const tierEl=document.getElementById('r-tier');
   tierEl.textContent=`${tier.emoji} ${tier.label}`;
   tierEl.style.color=tier.color;tierEl.style.borderColor=tier.color;
   tierEl.style.background=tier.color+'22';
   document.getElementById('r-desc').textContent=tier.desc;
 
-  // Needle
+  // Needle (1–10 → 0–100%)
   setTimeout(()=>{
     document.getElementById('r-needle').style.left=`${((sc.score-1)/9)*100}%`;
     document.getElementById('r-needle').style.borderColor=tier.color;
   },200);
 
-  // Detail grid
+  // Detail stat grid
   const dg=document.getElementById('r-dg');dg.innerHTML='';
   [{v:sc.gcCnt,n:'Game Changers'},{v:sc.saltSum.toFixed(0),n:'Est. Salt'},
    {v:sc.ramp,n:'Ramp Pieces'},{v:sc.draw,n:'Draw Spells'},
@@ -625,19 +791,20 @@ function render(deck,sc,sfMap){
   ].forEach(d=>dg.insertAdjacentHTML('beforeend',
     `<div class="dc"><div class="dv">${d.v}</div><div class="dn">${d.n}</div></div>`));
 
-  // Score bars
+  // Score bars — category name is clickable → popup
   const barsEl=document.getElementById('r-bars');barsEl.innerHTML='';
   Object.values(sc.sub).forEach(s=>{
     const pct=Math.round((s.pts/s.max)*100);
-    barsEl.insertAdjacentHTML('beforeend',`
-      <div class="brow">
-        <div class="bh">
-          <span class="bn">${s.lbl}</span>
-          <span class="bp">${s.pts}<span class="bval">/${s.max}</span>
-          &nbsp;·&nbsp;<span class="bval">${s.val}</span></span>
-        </div>
-        <div class="bt"><div class="bf" style="width:0%" data-t="${pct}%"></div></div>
-      </div>`);
+    const div=document.createElement('div');
+    div.className='brow';
+    div.innerHTML=`
+      <div class="bh">
+        <span class="bn" onclick="openPopup('${s.key}','${s.lbl}')">${s.lbl}</span>
+        <span class="bp">${s.pts}<span class="bval">/${s.max}</span>
+        &nbsp;·&nbsp;<span class="bval">${s.val}</span></span>
+      </div>
+      <div class="bt"><div class="bf" style="width:0%" data-t="${pct}%"></div></div>`;
+    barsEl.appendChild(div);
   });
   setTimeout(()=>document.querySelectorAll('.bf').forEach(el=>el.style.width=el.dataset.t),300);
 
@@ -654,7 +821,7 @@ function render(deck,sc,sfMap){
   });
 }
 
-// ── MAIN ─────────────────────────────────────────────────────────────────
+// ── MAIN ───────────────────────────────────────────────────────────────────────
 async function go(){
   const rawUrl=document.getElementById('url-in').value.trim();
   const btn=document.getElementById('eval-btn');
@@ -670,29 +837,19 @@ async function go(){
 
   btn.disabled=true;ld.style.display='block';
   try{
-    // Step 1: fetch deck
     ld.textContent='📡 Fetching deck list…';
     const deck=parsed.src==='archidekt'?await fetchArchi(parsed.id):await fetchMox(parsed.id);
 
-    // Step 2: collect all unique card names (including commander, including lands for art)
-    // We want art for all non-land cards for the background
-    const allUniqueNames=[...new Set(deck.cards.map(c=>c.name))];
     const nonLandNames=[...new Set(deck.cards.filter(c=>!c.isLand).map(c=>c.name))];
-
-    // Step 3: Scryfall batch — use non-land cards for background + prices
-    // This is ONE or TWO HTTP calls (75 cards per batch)
-    ld.textContent=`🃏 Fetching art & prices for ${nonLandNames.length} cards from Scryfall…`;
+    ld.textContent=`🃏 Fetching art & prices (${nonLandNames.length} unique cards)…`;
     const sfMap=await scryfallBatch(nonLandNames);
 
-    // Step 4: calculate scores (prices come from sfMap)
     ld.textContent='⚡ Calculating power level…';
     const sc=calcScores(deck.cards,sfMap);
 
-    // Step 5: show results
     document.getElementById('is').style.display='none';
     document.getElementById('rs').style.display='block';
     render(deck,sc,sfMap);
-
   }catch(e){
     console.error(e);
     err.innerHTML=`⚠️ <strong>${e.message}</strong>`;
@@ -705,17 +862,16 @@ async function go(){
 function goBack(){
   document.getElementById('rs').style.display='none';
   document.getElementById('is').style.display='block';
-  // Reset commander image
   const img=document.getElementById('r-img');
   img.style.display='none';img.src='';
   const ph=document.getElementById('r-img-ph');
   if(ph)ph.style.display='flex';
+  G_sfMap={};G_cardLists={};
   applyPal(PAL['G']);
   loadSplash();
 }
 
 document.getElementById('url-in').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
-// Load splash immediately on page load
 loadSplash();
 </script>
 </body>

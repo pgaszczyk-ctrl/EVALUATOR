@@ -16,6 +16,66 @@ html,body{min-height:100vh}
 body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);transition:background 1s ease;}
 
+/* ── LOADING OVERLAY ── */
+#overlay{
+  position:fixed;inset:0;z-index:100;
+  background:var(--bg1);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:28px;
+  transition:opacity .5s ease;
+}
+#overlay.show{display:flex}
+#overlay.fade{opacity:0;pointer-events:none}
+.ov-logo{font-family:'Cinzel',serif;font-size:clamp(24px,5vw,38px);font-weight:900;
+  color:var(--a);letter-spacing:3px;
+  text-shadow:0 0 50px color-mix(in srgb,var(--a) 60%,transparent);}
+.ov-steps{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px}
+.ov-step{
+  display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:12px;
+  border:1px solid var(--bdr);background:rgba(255,255,255,.04);
+  font-size:14px;color:var(--m);transition:all .3s;
+}
+.ov-step.active{border-color:var(--a);background:rgba(var(--a-raw),.08);color:var(--t)}
+.ov-step.done{opacity:.45}
+.ov-step .st-icon{width:22px;text-align:center;font-size:16px;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ov-spinner{
+  width:18px;height:18px;border-radius:50%;border:2.5px solid transparent;
+  border-top-color:var(--a);border-right-color:var(--a);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+.ov-progress{width:100%;max-width:360px;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.ov-bar{height:100%;background:linear-gradient(90deg,var(--a2),var(--a));border-radius:2px;
+  transition:width .6s ease;width:0%}
+
+/* ── STRATEGY AUDIT ── */
+.audit-pnl{padding:22px 26px;margin-bottom:18px}
+.audit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:14px}
+.audit-card{
+  background:rgba(200,80,60,.08);border:1px solid rgba(200,80,60,.25);
+  border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;
+  transition:border-color .2s;
+}
+.audit-card:hover{border-color:rgba(200,80,60,.5)}
+.audit-card img{width:100%;border-radius:7px;box-shadow:0 4px 16px rgba(0,0,0,.6)}
+.audit-card-name{font-size:12px;font-weight:700;color:var(--t);line-height:1.3}
+.audit-card-reason{font-size:11px;color:rgba(255,160,140,1);line-height:1.4;font-style:italic}
+.audit-none{font-size:13px;color:var(--m);opacity:.6;padding:4px 0}
+
+/* ── MOBILE ── */
+@media(max-width:680px){
+  .mg{grid-template-columns:1fr}
+  .ai-grid{grid-template-columns:1fr}
+  .dg{grid-template-columns:repeat(3,1fr)}
+  .hdr-strip{display:none}
+  .curve-outer{gap:3px}
+  .clbl{font-size:10px}
+  .audit-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:400px){
+  .dg{grid-template-columns:repeat(2,1fr)}
+  .tier-badge{font-size:14px;padding:9px 14px}
+}
+
 /* ── BACKGROUND ── */
 #bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 /* Cards have NO per-card opacity — fully opaque so they stack realistically */
@@ -206,42 +266,56 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
   padding:2px 8px;font-size:11px;font-weight:700;
 }
 
-/* ── GAMEPLAN / AI PANEL ── */
-.gp-pnl{padding:24px 28px;margin-bottom:18px}
-.gp-btn{
-  display:flex;align-items:center;gap:10px;
-  padding:14px 24px;border-radius:14px;border:1px solid var(--bdr);
-  background:rgba(255,255,255,.04);color:var(--t);
-  font-family:'Nunito Sans',sans-serif;font-size:14px;font-weight:700;
-  cursor:pointer;transition:all .2s;width:100%;justify-content:center;
-}
-.gp-btn:hover:not(:disabled){border-color:var(--a);background:rgba(var(--a),.15);color:var(--a)}
-.gp-btn:disabled{opacity:.45;cursor:not-allowed}
-.gp-note{font-size:11px;color:var(--m);opacity:.45;text-align:center;margin-top:10px}
+/* ── AI ANALYSIS PANEL ── */
+.ai-pnl{padding:24px 28px;margin-bottom:18px}
+.ai-loading-bar{font-size:13px;color:var(--m);letter-spacing:.5px;display:none}
+.ai-loading-bar span{color:var(--a)}
 @keyframes gpPulse{0%,100%{opacity:.4}50%{opacity:1}}
-.gp-loading{text-align:center;color:var(--m);font-size:13px;padding:20px 0;
-  animation:gpPulse 1.4s infinite;display:none}
-.gp-result{margin-top:22px;display:none}
-.gp-gameplan{
-  background:rgba(255,255,255,.05);border-radius:14px;padding:18px 20px;
-  border-left:3px solid var(--a);font-size:15px;line-height:1.75;
-  color:var(--t);margin-bottom:20px;
+.ai-loading-bar{animation:gpPulse 1.5s infinite}
+/* Strategy badge */
+.strategy-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;
+  border:1px solid var(--a);color:var(--a);background:rgba(var(--a-raw),.1);
+  margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase;font-family:'Cinzel',serif;
 }
-.gp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
-.gp-card{
-  background:rgba(255,255,255,.04);border:1px solid var(--bdr);
-  border-radius:14px;padding:16px 18px;
+/* Gameplan text block */
+.ai-gameplan{
+  background:rgba(255,255,255,.05);border-radius:14px;padding:16px 20px;
+  border-left:3px solid var(--a);font-size:14px;line-height:1.75;
+  color:var(--t);margin-bottom:18px;
 }
-.gp-card-title{
-  font-family:'Cinzel',serif;font-size:10px;letter-spacing:2.5px;
-  color:var(--m);text-transform:uppercase;margin-bottom:10px;
+/* AI detail cards grid */
+.ai-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:8px}
+.ai-card{background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  border-radius:12px;padding:14px 16px;}
+.ai-card-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;
+  color:var(--m);text-transform:uppercase;margin-bottom:8px}
+.ai-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.ai-list li{font-size:13px;line-height:1.5;color:var(--t);padding-left:14px;position:relative}
+.ai-list li::before{content:'·';position:absolute;left:3px;color:var(--a);font-size:16px;line-height:1.1}
+/* AI error */
+.ai-err{color:#ff9999;font-size:12px;padding:10px 14px;margin-top:8px;
+  background:rgba(200,60,60,.12);border-radius:8px;border:1px solid rgba(200,60,60,.25);}
+/* AI KPI grid cells (in detail grid) */
+.dc-ai{border-color:var(--a);opacity:.9}
+.dc-ai .dv{font-size:22px}
+.dc-ai-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:6px;overflow:hidden}
+.dc-ai-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--a2),var(--a));transition:width 1s .4s}
+/* Weight tag on bars */
+.w-tag{
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;
+  letter-spacing:.3px;display:inline-block;vertical-align:middle;
 }
-.gp-list{list-style:none;display:flex;flex-direction:column;gap:7px}
-.gp-list li{font-size:13px;line-height:1.5;color:var(--t);
-  padding-left:16px;position:relative;}
-.gp-list li::before{content:'·';position:absolute;left:4px;color:var(--a);font-size:16px;line-height:1.1}
-.gp-err{color:#ff9999;font-size:13px;margin-top:12px;padding:12px 16px;
-  background:rgba(200,60,60,.15);border-radius:10px;border:1px solid rgba(200,60,60,.3);}
+.w-up{background:rgba(80,200,80,.2);color:#70d870;border:1px solid rgba(80,200,80,.3)}
+.w-dn{background:rgba(200,80,80,.2);color:#e07070;border:1px solid rgba(200,80,80,.3)}
+.w-reason{font-size:11px;color:var(--m);opacity:.6;margin-top:3px;font-style:italic;
+  padding-left:2px;line-height:1.4;display:block}
+/* Score AI badge */
+.score-ai-badge{
+  font-size:10px;letter-spacing:1.5px;color:var(--a);opacity:.7;
+  text-transform:uppercase;font-family:'Cinzel',serif;margin-top:4px;display:none
+}
 
 /* ── POPUP ── */
 #popup{position:fixed;inset:0;z-index:200;display:none;
@@ -286,6 +360,18 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
 <body>
 <div id="bg"><div id="bg-wrap"></div></div>
 <div id="veil"></div>
+
+<!-- FULL-SCREEN LOADING OVERLAY -->
+<div id="overlay">
+  <div class="ov-logo">⚔ PowerEDH</div>
+  <div class="ov-steps">
+    <div class="ov-step" id="ov-1"><span class="st-icon">📡</span> Fetching deck list</div>
+    <div class="ov-step" id="ov-2"><span class="st-icon">🃏</span> Loading card art &amp; prices</div>
+    <div class="ov-step" id="ov-3"><span class="st-icon">🤖</span> AI analyzing strategy</div>
+    <div class="ov-step" id="ov-4"><span class="st-icon">⚡</span> Calculating power level</div>
+  </div>
+  <div class="ov-progress"><div class="ov-bar" id="ov-bar"></div></div>
+</div>
 
 <!-- POPUP -->
 <div id="popup" onclick="closePopup()">
@@ -366,6 +452,7 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
           <div>
             <div class="sc-lbl">Playgroup Power Level</div>
             <div class="big-sc" id="r-score">—<span>/10</span></div>
+            <div class="score-ai-badge" id="r-ai-badge">✦ AI-Adjusted Score</div>
             <div class="tier-desc" id="r-desc"></div>
           </div>
           <div class="tier-badge" id="r-tier">🌱 Precon</div>
@@ -398,22 +485,29 @@ body{font-family:'Nunito Sans',sans-serif;color:var(--t);overflow-x:hidden;
       </div>
     </div>
 
-    <!-- AI Gameplan Analysis -->
-    <div class="pnl gp-pnl" id="r-gp-pnl">
-      <div class="sec-t">AI Gameplan Analysis</div>
-      <button class="gp-btn" id="gp-btn" onclick="analyzeGameplan()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
-          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 16v-4m0-4h.01"/>
-        </svg>
-        Analyze Gameplan with AI
-      </button>
-      <div class="gp-note">Uses Claude AI · Requires <code>ANTHROPIC_API_KEY</code> in Vercel env vars</div>
-      <div class="gp-loading" id="gp-loading">🤖 Claude is reading your deck…</div>
-      <div class="gp-err" id="gp-err" style="display:none"></div>
-      <div class="gp-result" id="gp-result">
-        <div class="gp-gameplan" id="gp-gameplan"></div>
-        <div class="gp-grid" id="gp-grid"></div>
+    <!-- AI Gameplan Analysis (auto-triggered) -->
+    <div class="pnl ai-pnl" id="r-ai-pnl" style="display:none">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="sec-t" style="margin-bottom:0">AI Gameplan Analysis</div>
+        <div class="ai-loading-bar" id="ai-loading">🤖 <span>Claude is reading your deck…</span></div>
+        <div class="strategy-badge" id="ai-strategy" style="display:none"></div>
       </div>
+      <div class="ai-err" id="ai-err" style="display:none"></div>
+      <div id="ai-result" style="display:none">
+        <div class="ai-gameplan" id="ai-gameplan"></div>
+        <div class="ai-grid" id="ai-grid"></div>
+      </div>
+      <div style="font-size:11px;color:var(--m);opacity:.35;margin-top:10px">
+        Powered by Claude · Score weights adjusted per deck strategy · Key at console.anthropic.com → ANTHROPIC_API_KEY in Vercel env vars
+      </div>
+    </div>
+
+    <!-- Strategy Audit — off-theme cards -->
+    <div class="pnl audit-pnl" id="r-audit-pnl" style="display:none">
+      <div class="sec-t">⚠️ Strategy Audit
+        <span style="font-family:'Nunito Sans',sans-serif;font-size:10px;opacity:.5;letter-spacing:.5px;text-transform:none;margin-left:8px">cards that may not fit your plan</span>
+      </div>
+      <div id="r-audit-body"></div>
     </div>
 
     <div class="fnote">
@@ -909,44 +1003,59 @@ function calcScores(cards,sfMap){
     cnt:nonLandUniq.filter(c=>n===6?(c.cmc||0)>=6:Math.floor(c.cmc||0)===n).length
   }));
 
-  // Sub-scores (raw max=100)
-  const sub={
-    gameChangers:{pts:Math.min(18,gcCnt*4),max:18,lbl:'Game Changers',val:gcCnt,key:'gameChangers'},
-    salt:{pts:saltSum<=6?3:saltSum<=18?7:saltSum<=36?11:saltSum<=58?15:17,max:17,lbl:'Est. Salt',val:saltSum.toFixed(1),key:'salt'},
+  // ── AI WEIGHTS ─────────────────────────────────────────────────────────────
+  const W=window._aiData?.weights||{};
+  const wt=(key)=>Math.max(0,Math.min(2,parseFloat(W[key])||1.0));
+  const aiWeights={
+    gameChangers:wt('gameChangers'),salt:wt('salt'),deckPrice:wt('deckPrice'),
+    avgCmc:wt('avgCmc'),ramp:wt('ramp'),draw:wt('draw'),tutors:wt('tutors'),
+  };
+  const aiWeightReasons=window._aiData?.weightReasons||{};
+  const aiKpis=window._aiData?.aiKpis||[];
+  const aiAdjusted=window._aiData!=null;
+
+  // Base sub-scores, then apply weights
+  const baseSub={
+    gameChangers:{bPts:Math.min(18,gcCnt*4),max:18,lbl:'Game Changers',val:gcCnt,key:'gameChangers'},
+    salt:{bPts:saltSum<=6?3:saltSum<=18?7:saltSum<=36?11:saltSum<=58?15:17,max:17,lbl:'Est. Salt',val:saltSum.toFixed(1),key:'salt'},
     deckPrice:{
-      pts:avgPrice<0.4?1:avgPrice<1?3:avgPrice<2.5?6:avgPrice<5?9:avgPrice<10?12:15,
+      bPts:avgPrice<0.4?1:avgPrice<1?3:avgPrice<2.5?6:avgPrice<5?9:avgPrice<10?12:15,
       max:15,lbl:'Deck Value',val:estDeckVal>0?`~$${estDeckVal.toLocaleString()}`:'—',key:'deckPrice'
     },
-    avgCmc:{pts:avgCmc>=4?2:avgCmc>=3.3?5:avgCmc>=2.8?9:avgCmc>=2.3?12:15,max:15,lbl:'Avg CMC',val:avgCmc.toFixed(2),key:'avgCmc'},
-    ramp:{pts:ramp===0?0:ramp<=4?2:ramp<=8?5:ramp<=12?9:12,max:12,lbl:'Ramp',val:ramp,key:'ramp'},
-    draw:{pts:draw===0?0:draw<=4?2:draw<=8?5:draw<=12?9:12,max:12,lbl:'Card Draw',val:draw,key:'draw'},
-    tutors:{pts:tutor===0?0:tutor<=2?3:tutor<=4?7:tutor<=6?9:11,max:11,lbl:'Tutors',val:tutor,key:'tutors'},
+    avgCmc:{bPts:avgCmc>=4?2:avgCmc>=3.3?5:avgCmc>=2.8?9:avgCmc>=2.3?12:15,max:15,lbl:'Avg CMC',val:avgCmc.toFixed(2),key:'avgCmc'},
+    ramp:{bPts:ramp===0?0:ramp<=4?2:ramp<=8?5:ramp<=12?9:12,max:12,lbl:'Ramp',val:ramp,key:'ramp'},
+    draw:{bPts:draw===0?0:draw<=4?2:draw<=8?5:draw<=12?9:12,max:12,lbl:'Card Draw',val:draw,key:'draw'},
+    tutors:{bPts:tutor===0?0:tutor<=2?3:tutor<=4?7:tutor<=6?9:11,max:11,lbl:'Tutors',val:tutor,key:'tutors'},
   };
+  const sub={};
+  for(const[key,s]of Object.entries(baseSub)){
+    const w=aiWeights[key];
+    sub[key]={...s,pts:s.bPts*w,wMax:s.max*w,weight:w,weightReason:aiWeightReasons[key]||null};
+  }
 
   const tot=Object.values(sub).reduce((s,v)=>s+v.pts,0);
-  const mx=Object.values(sub).reduce((s,v)=>s+v.max,0);
-  const score=parseFloat(Math.max(1,Math.min(10,(1+(tot/mx)*9))).toFixed(1));
+  const mx=Object.values(sub).reduce((s,v)=>s+v.wMax,0);
+  const staticRaw=mx>0?tot/mx:0;
+  const aiKpiRaw=aiKpis.length>0?aiKpis.reduce((s,k)=>s+k.score,0)/(aiKpis.length*10):null;
+  const rawScore=aiKpiRaw!==null?staticRaw*0.55+aiKpiRaw*0.45:staticRaw;
+  const score=parseFloat(Math.max(1,Math.min(10,(1+rawScore*9))).toFixed(1));
 
-  // Card lists for popup (store {name, manaCost} per category)
+  // Card lists for popup
   const cardLists={
-    gameChangers: gcList.map(c=>({name:c.name,manaCost:c.manaCost})),
-    salt: cards.filter(c=>SALT[c.name]>0).map(c=>({name:c.name,manaCost:c.manaCost}))
-               .sort((a,b)=>(SALT[b.name]||0)-(SALT[a.name]||0)),
-    deckPrice: nonLandUniq.filter(c=>sfMap[c.name]?.price>0)
-               .sort((a,b)=>(sfMap[b.name]?.price||0)-(sfMap[a.name]?.price||0))
-               .map(c=>({name:c.name,manaCost:c.manaCost})),
-    avgCmc: [...nonLandUniq].sort((a,b)=>(a.cmc||0)-(b.cmc||0)).map(c=>({name:c.name,manaCost:c.manaCost})),
-    ramp: rampList.map(c=>({name:c.name,manaCost:c.manaCost})),
-    draw: drawList.map(c=>({name:c.name,manaCost:c.manaCost})),
-    tutors: tutorList.map(c=>({name:c.name,manaCost:c.manaCost})),
-    recursion: recursionList.map(c=>({name:c.name,manaCost:c.manaCost})),
-    // Theme lists are stored on the theme objects themselves
+    gameChangers:gcList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    salt:cards.filter(c=>SALT[c.name]>0).map(c=>({name:c.name,manaCost:c.manaCost})).sort((a,b)=>(SALT[b.name]||0)-(SALT[a.name]||0)),
+    deckPrice:nonLandUniq.filter(c=>sfMap[c.name]?.price>0).sort((a,b)=>(sfMap[b.name]?.price||0)-(sfMap[a.name]?.price||0)).map(c=>({name:c.name,manaCost:c.manaCost})),
+    avgCmc:[...nonLandUniq].sort((a,b)=>(a.cmc||0)-(b.cmc||0)).map(c=>({name:c.name,manaCost:c.manaCost})),
+    ramp:rampList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    draw:drawList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    tutors:tutorList.map(c=>({name:c.name,manaCost:c.manaCost})),
+    recursion:recursionList.map(c=>({name:c.name,manaCost:c.manaCost})),
   };
-  // Register theme card lists so popup works
-  themes.forEach(t=>{ cardLists[t.key]=t.cards; });
+  themes.forEach(t=>{cardLists[t.key]=t.cards;});
 
   return{score,sub,avgCmc,gcCnt,saltSum,ramp,draw,tutor,recursion,bkt,
-    landCount,totalCards,curve,avgPrice,estDeckVal,cardLists,themes};
+    landCount,totalCards,curve,avgPrice,estDeckVal,cardLists,themes,
+    aiKpis,aiAdjusted};
 }
 
 // ── RENDER ─────────────────────────────────────────────────────────────────────
@@ -960,11 +1069,8 @@ function render(deck,sc,sfMap){
   G_deckData=deck;
   G_scoreData=sc;
 
-  // Reset gameplan panel
-  document.getElementById('gp-btn').disabled=false;
-  document.getElementById('gp-loading').style.display='none';
-  document.getElementById('gp-err').style.display='none';
-  document.getElementById('gp-result').style.display='none';
+  // Show AI panel (already loading or will show)
+  document.getElementById('r-ai-pnl').style.display='block';
 
   // Background
   const allImgs=Object.values(sfMap).map(v=>v.img).filter(Boolean);
@@ -1014,6 +1120,7 @@ function render(deck,sc,sfMap){
   document.getElementById('r-score').innerHTML=`${sc.score}<span>/10</span>`;
   document.getElementById('r-score').style.color=tier.color;
   document.getElementById('r-score').style.textShadow=`0 0 45px ${tier.color}88`;
+  document.getElementById('r-ai-badge').style.display=sc.aiAdjusted?'block':'none';
   const tierEl=document.getElementById('r-tier');
   tierEl.textContent=`${tier.emoji} ${tier.label}`;
   tierEl.style.color=tier.color;tierEl.style.borderColor=tier.color;
@@ -1034,19 +1141,39 @@ function render(deck,sc,sfMap){
    {v:sc.estDeckVal>0?`$${sc.estDeckVal.toLocaleString()}`:'—',n:'Est. Value'},
   ].forEach(d=>dg.insertAdjacentHTML('beforeend',
     `<div class="dc"><div class="dv">${d.v}</div><div class="dn">${d.n}</div></div>`));
+  // AI KPIs in grid (only when available)
+  sc.aiKpis.forEach(k=>{
+    const pct=Math.round(k.score/10*100);
+    dg.insertAdjacentHTML('beforeend',`
+      <div class="dc dc-ai" title="${k.reason||''}">
+        <div class="dv">${k.icon} ${k.score}</div>
+        <div class="dn">${k.label}</div>
+        <div class="dc-ai-bar"><div class="dc-ai-fill" style="width:0%" data-t="${pct}%"></div></div>
+      </div>`);
+  });
+  setTimeout(()=>document.querySelectorAll('.dc-ai-fill').forEach(el=>el.style.width=el.dataset.t),350);
 
-  // Score bars — category name is clickable → popup
+  // Score bars — with weight tags when AI adjusted them
   const barsEl=document.getElementById('r-bars');barsEl.innerHTML='';
   Object.values(sc.sub).forEach(s=>{
-    const pct=Math.round((s.pts/s.max)*100);
+    const pct=Math.round((s.pts/s.wMax)*100)||0;
+    // Weight tag: show if weight deviates by >15% from 1.0
+    let wTag='',wReason='';
+    if(s.weight!==undefined&&Math.abs(s.weight-1.0)>0.15){
+      const cls=s.weight>1?'w-up':'w-dn';
+      const sign=s.weight>1?'↑':'↓';
+      wTag=`<span class="w-tag ${cls}">×${s.weight.toFixed(1)} ${sign}</span>`;
+      if(s.weightReason) wReason=`<span class="w-reason">${s.weightReason}</span>`;
+    }
     const div=document.createElement('div');
     div.className='brow';
     div.innerHTML=`
       <div class="bh">
-        <span class="bn" onclick="openPopup('${s.key}','${s.lbl}')">${s.lbl}</span>
-        <span class="bp">${s.pts}<span class="bval">/${s.max}</span>
+        <span class="bn" onclick="openPopup('${s.key}','${s.lbl}')">${s.lbl}</span>${wTag}
+        <span class="bp">${Math.round(s.pts)}<span class="bval">/${Math.round(s.wMax)}</span>
         &nbsp;·&nbsp;<span class="bval">${s.val}</span></span>
       </div>
+      ${wReason}
       <div class="bt"><div class="bf" style="width:0%" data-t="${pct}%"></div></div>`;
     barsEl.appendChild(div);
   });
@@ -1096,82 +1223,100 @@ function render(deck,sc,sfMap){
   }
 }
 
-// ── AI GAMEPLAN ANALYSIS ──────────────────────────────────────────────────────
-async function analyzeGameplan(){
-  if(!G_deckData||!G_scoreData) return;
-  const btn=document.getElementById('gp-btn');
-  const loading=document.getElementById('gp-loading');
-  const errEl=document.getElementById('gp-err');
-  const result=document.getElementById('gp-result');
+// ── LOADING OVERLAY CONTROL ───────────────────────────────────────────────────
+const OV_STEPS=['ov-1','ov-2','ov-3','ov-4'];
+function ovShow(){
+  const el=document.getElementById('overlay');
+  el.classList.add('show');el.classList.remove('fade');
+  OV_STEPS.forEach(id=>document.getElementById(id)?.classList.remove('active','done'));
+  document.getElementById('ov-bar').style.width='0%';
+}
+function ovStep(n){ // 1-4
+  OV_STEPS.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(i+1<n){el.classList.remove('active');el.classList.add('done');}
+    else if(i+1===n){el.classList.add('active');el.classList.remove('done');}
+    else{el.classList.remove('active','done');}
+  });
+  document.getElementById('ov-bar').style.width=`${Math.round((n/4)*100)}%`;
+}
+function ovHide(){
+  const el=document.getElementById('overlay');
+  el.classList.add('fade');
+  setTimeout(()=>{el.classList.remove('show','fade');},500);
+}
 
-  btn.disabled=true;
-  loading.style.display='block';
-  errEl.style.display='none';
-  result.style.display='none';
+// ── AI PANEL RENDERER (with Strategy Audit) ───────────────────────────────────
+function renderAiPanel(aiData){
+  const loading=document.getElementById('ai-loading');
+  const errEl=document.getElementById('ai-err');
+  const result=document.getElementById('ai-result');
+  const stratEl=document.getElementById('ai-strategy');
 
-  try{
-    const sc=G_scoreData;
-    const deck=G_deckData;
-    const cardNames=deck.cards
-      .filter(c=>!c.isLand&&!c.isCmd)
-      .map(c=>c.name);
+  loading.style.display='none';
 
-    const resp=await fetch('/api/analyze',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        commander: deck.cmd.name,
-        colors: deck.colors,
-        deckName: deck.deckName,
-        cardNames,
-        themes: sc.themes?.map(t=>t.label)||[],
-        score: sc.score,
-        stats:{
-          avgCmc:sc.avgCmc,
-          ramp:sc.ramp,
-          draw:sc.draw,
-          tutor:sc.tutor,
-          recursion:sc.recursion,
-          estDeckVal:sc.estDeckVal,
-        }
-      })
-    });
+  if(!aiData||aiData.error){
+    errEl.textContent=`⚠️ ${aiData?.error||'AI analysis unavailable — score uses static weights.'}`;
+    errEl.style.display='block';
+    return;
+  }
 
-    const data=await resp.json();
-    if(!resp.ok||data.error){
-      errEl.textContent=`⚠️ ${data.error||'Unknown error'}`;
-      errEl.style.display='block';
-      return;
-    }
+  // Strategy badge
+  if(aiData.strategy){
+    stratEl.textContent=aiData.strategy.toUpperCase().replace(/-/g,' ');
+    stratEl.style.display='inline-flex';
+  }
 
-    // Render gameplan
-    document.getElementById('gp-gameplan').textContent=data.gameplan||'—';
+  // Gameplan text
+  document.getElementById('ai-gameplan').textContent=aiData.gameplan||'—';
 
-    const sections=[
-      {title:'🏆 Win Conditions',  key:'wincons'},
-      {title:'⚡ Key Synergies',   key:'keysynergies'},
-      {title:'⚠️ Weaknesses',      key:'weaknesses'},
-      {title:'💡 Tips',            key:'tips'},
-    ];
-    const grid=document.getElementById('gp-grid');
-    grid.innerHTML='';
-    sections.forEach(s=>{
-      const items=data[s.key]||[];
-      if(!items.length) return;
+  // Detail cards
+  const sections=[
+    {title:'🏆 Win Conditions',  key:'wincons'},
+    {title:'⚡ Key Synergies',   key:'keysynergies'},
+    {title:'⚠️ Weaknesses',      key:'weaknesses'},
+    {title:'💡 Tips',            key:'tips'},
+  ];
+  const grid=document.getElementById('ai-grid');
+  grid.innerHTML='';
+  sections.forEach(s=>{
+    const items=aiData[s.key]||[];
+    if(!items.length) return;
+    const card=document.createElement('div');
+    card.className='ai-card';
+    card.innerHTML=`<div class="ai-card-title">${s.title}</div>
+      <ul class="ai-list">${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+    grid.appendChild(card);
+  });
+
+  result.style.display='block';
+
+  // ── STRATEGY AUDIT ──────────────────────────────────────────────────────────
+  const auditPnl=document.getElementById('r-audit-pnl');
+  const auditBody=document.getElementById('r-audit-body');
+  const offTheme=aiData.offTheme||[];
+  auditPnl.style.display='block';
+  if(!offTheme.length){
+    auditBody.innerHTML=`<div class="audit-none">✅ No major off-theme cards detected — deck looks cohesive.</div>`;
+  } else {
+    const grid=document.createElement('div');
+    grid.className='audit-grid';
+    offTheme.forEach(item=>{
+      const sf=G_sfMap[item.name];
+      const imgSrc=sf?.img||
+        `https://api.scryfall.com/cards/named?format=image&version=normal&fuzzy=${encodeURIComponent(item.name)}`;
       const card=document.createElement('div');
-      card.className='gp-card';
-      card.innerHTML=`<div class="gp-card-title">${s.title}</div>
-        <ul class="gp-list">${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+      card.className='audit-card';
+      card.innerHTML=`
+        <img src="${imgSrc}" alt="${item.name}" loading="lazy"
+          onerror="this.style.display='none'">
+        <div class="audit-card-name">${item.name}</div>
+        <div class="audit-card-reason">${item.reason}</div>`;
       grid.appendChild(card);
     });
-
-    result.style.display='block';
-  }catch(e){
-    errEl.textContent=`⚠️ ${e.message}`;
-    errEl.style.display='block';
-  }finally{
-    btn.disabled=false;
-    loading.style.display='none';
+    auditBody.innerHTML='';
+    auditBody.appendChild(grid);
   }
 }
 
@@ -1190,29 +1335,73 @@ async function go(){
   }
 
   btn.disabled=true;ld.style.display='block';
+  window._aiData=null;
+  ovShow(); ovStep(1);
+
   try{
-    ld.textContent='📡 Fetching deck list…';
     const deck=parsed.src==='archidekt'?await fetchArchi(parsed.id):await fetchMox(parsed.id);
 
+    // Update URL so this evaluation is bookmarkable/shareable
+    try{
+      const u=new URL(window.location.href);
+      u.searchParams.set('deck',rawUrl);
+      history.replaceState({},'',u.toString());
+    }catch{}
+
     const nonLandNames=[...new Set(deck.cards.filter(c=>!c.isLand).map(c=>c.name))];
-    ld.textContent=`🃏 Fetching art & prices (${nonLandNames.length} unique cards)…`;
-    const sfMap=await scryfallBatch(nonLandNames);
 
-    // Ensure commander is resolved — if batch missed it (DFC name mismatch),
-    // do a dedicated fuzzy lookup which is guaranteed to return card_faces
-    if(deck.cmd&&!sfMap[deck.cmd.name]?.img){
-      ld.textContent='🎴 Fetching commander art…';
-      const cmdData=await scryfallSingle(deck.cmd.name);
-      if(cmdData) sfMap[deck.cmd.name]=cmdData;
-    }
+    // Prime panels
+    document.getElementById('r-ai-pnl').style.display='block';
+    document.getElementById('ai-loading').style.display='block';
+    document.getElementById('ai-err').style.display='none';
+    document.getElementById('ai-result').style.display='none';
+    document.getElementById('ai-strategy').style.display='none';
+    document.getElementById('r-audit-pnl').style.display='none';
 
-    ld.textContent='⚡ Calculating power level…';
+    ovStep(2); // Scryfall + AI in parallel
+
+    const nonLand=deck.cards.filter(c=>!c.isLand&&!c.isCmd);
+    const preStats={
+      avgCmc:nonLand.length?nonLand.reduce((s,c)=>s+(c.cmc||0),0)/nonLand.length:0,
+      ramp:nonLand.filter(c=>c.isRamp).length,
+      draw:nonLand.filter(c=>c.isDraw).length,
+      tutor:nonLand.filter(c=>c.isTutor).length,
+      recursion:nonLand.filter(c=>c.isRecursion).length,
+    };
+
+    const [sfResult,aiResult]=await Promise.allSettled([
+      (async()=>{
+        const map=await scryfallBatch(nonLandNames);
+        if(deck.cmd&&!map[deck.cmd.name]?.img){
+          const cd=await scryfallSingle(deck.cmd.name);
+          if(cd) map[deck.cmd.name]=cd;
+        }
+        return map;
+      })(),
+      fetch('/api/analyze',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          commander:deck.cmd.name,colors:deck.colors,deckName:deck.deckName,
+          cardNames:nonLandNames.slice(0,60),detectedThemes:[],stats:preStats,
+        })
+      }).then(r=>r.json()).catch(e=>({error:e.message}))
+    ]);
+
+    const sfMap=sfResult.status==='fulfilled'?sfResult.value:{};
+    const rawAi=aiResult.status==='fulfilled'?aiResult.value:{error:'Request failed'};
+    window._aiData=rawAi.error?null:rawAi;
+
+    ovStep(4);
     const sc=calcScores(deck.cards,sfMap);
 
+    ovHide();
     document.getElementById('is').style.display='none';
     document.getElementById('rs').style.display='block';
     render(deck,sc,sfMap);
+    renderAiPanel(rawAi);
+
   }catch(e){
+    ovHide();
     console.error(e);
     err.innerHTML=`⚠️ <strong>${e.message}</strong>`;
     err.style.display='block';
@@ -1231,13 +1420,34 @@ function goBack(){
   G_sfMap={};G_cardLists={};
   G_cmdFront='';G_cmdBack='';G_cmdFlipped=false;
   G_deckData=null;G_scoreData=null;
+  window._aiData=null;
   document.getElementById('r-flip-btn').style.display='none';
+  document.getElementById('r-ai-pnl').style.display='none';
+  document.getElementById('r-audit-pnl').style.display='none';
+  // Clear deck param from URL
+  try{
+    const u=new URL(window.location.href);
+    u.searchParams.delete('deck');
+    history.replaceState({},'',u.toString());
+  }catch{}
   applyPal(PAL['G']);
   loadSplash();
 }
 
 document.getElementById('url-in').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 loadSplash();
+
+// Auto-load deck from URL parameter on page open (enables shareable links)
+(function(){
+  try{
+    const u=new URL(window.location.href);
+    const deckParam=u.searchParams.get('deck');
+    if(deckParam&&parseUrl(deckParam)){
+      document.getElementById('url-in').value=deckParam;
+      setTimeout(go,300); // small delay so splash loads first
+    }
+  }catch{}
+})();
 </script>
 </body>
 </html>
